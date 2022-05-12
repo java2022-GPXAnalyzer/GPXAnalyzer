@@ -2,17 +2,56 @@
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "wait-on tcp:3000 && SET NODE_ENV=development && electron .",
+    "electron:serve": "concurrently -k \"yarn dev\" \"yarn electron\"",
+    "electron:build": "vite build && electron-builder"
+  },
+  "build": {
+    "appId": "com.fuyajo.gpx-analyzer",
+    "productName": "GPX Analyzer",
+    "copyright": "Copyright © 2022 Fuyajo",
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "public/logo.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist_electron"
+    }
   },
   "dependencies": {
     "vue": "^3.2.25"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
+    "concurrently": "^7.1.0",
+    "cross-env": "^7.0.3",
     "electron": "^18.2.3",
-    "vite": "^2.9.9"
+    "electron-builder": "^23.0.3",
+    "vite": "^2.9.9",
+    "wait-on": "^6.0.1"
   }
 }

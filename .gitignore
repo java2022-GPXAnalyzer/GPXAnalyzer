@@ -28,6 +28,7 @@ hs_err_pid*
 .DS_Store
 node_modules/
 /dist/
+*/dist_electron/
 build/win-unpacked/
 build/win-ia32-unpacked/
 npm-debug.log*
