@@ -447,6 +447,14 @@
   dependencies:
     "follow-redirects" "^1.14.7"
 
+"axios@^0.27.2", "axios@>= 0.20.0":
+  "integrity" "sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ=="
+  "resolved" "https://registry.npmjs.org/axios/-/axios-0.27.2.tgz"
+  "version" "0.27.2"
+  dependencies:
+    "follow-redirects" "^1.14.9"
+    "form-data" "^4.0.0"
+
 "balanced-match@^1.0.0":
   "integrity" "sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw=="
   "resolved" "https://registry.npmjs.org/balanced-match/-/balanced-match-1.0.2.tgz"
@@ -1135,7 +1143,7 @@
   dependencies:
     "to-regex-range" "^5.0.1"
 
-"follow-redirects@^1.14.7":
+"follow-redirects@^1.14.7", "follow-redirects@^1.14.9":
   "integrity" "sha512-aExlJShTV4qOUOL7yF1U5tvLCB0xQuudbf6toyYA0E/acBNw71mvjFTnLaRp50aQaYocMR0a/RMMBIHeZnGyjQ=="
   "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.0.tgz"
   "version" "1.15.0"
@@ -2427,7 +2435,12 @@
   optionalDependencies:
     "fsevents" "~2.3.2"
 
-"vue@^3.2.25", "vue@3.2.33":
+"vue-axios@^3.4.1":
+  "integrity" "sha512-8YZYUOQrBEJktxoQtrM4rr2LfVcDaWfJqv8MqtLlgLlkuBvCYKFSZSo6AXQ4YcCzdgccDqstmuaEh68lcH9xWA=="
+  "resolved" "https://registry.npmjs.org/vue-axios/-/vue-axios-3.4.1.tgz"
+  "version" "3.4.1"
+
+"vue@^3.0.0 || ^2.0.0", "vue@^3.2.25", "vue@3.2.33":
   "integrity" "sha512-si1ExAlDUrLSIg/V7D/GgA4twJwfsfgG+t9w10z38HhL/HA07132pUQ2KuwAo8qbCyMJ9e6OqrmWrOCr+jW7ZQ=="
   "resolved" "https://registry.npmjs.org/vue/-/vue-3.2.33.tgz"
   "version" "3.2.33"
