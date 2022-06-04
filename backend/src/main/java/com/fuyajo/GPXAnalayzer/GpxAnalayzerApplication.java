@@ -4,6 +4,9 @@ package com.fuyajo.GPXAnalayzer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
+
+import com.fuyajo.GPXAnalayzer.parser.GpxParser;
+
 import org.springframework.http.MediaType;
 
 @SpringBootApplication
@@ -27,6 +30,23 @@ public class GpxAnalayzerApplication {
 
 	@GetMapping("/api/test")
 	public String apiTest() {
+		try{
+			GpxParser gpx = new GpxParser();
+			gpx.write("test.gpx");
+		} catch (Exception e) {
+			return e.getMessage();
+		}
 		return "API Test Success";
+	}
+
+	@GetMapping("/api/test/read")
+	public String apiTestRead() {
+		try{
+			GpxParser gpx = new GpxParser();
+			gpx.read("test.gpx");
+		} catch (Exception e) {
+			return e.getMessage();
+		}
+		return "API Test Read Success";
 	}
 }
