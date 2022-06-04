@@ -1,13 +1,17 @@
 package com.fuyajo.GPXAnalayzer;
 
+import java.io.IOException;
+import java.util.List;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.MediaType;
 
 import com.fuyajo.GPXAnalayzer.parser.GpxParser;
-
-import org.springframework.http.MediaType;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.fuyajo.GPXAnalayzer.database.GPXPoint;
 
 @SpringBootApplication
 @RestController
@@ -30,12 +34,6 @@ public class GpxAnalayzerApplication {
 
 	@GetMapping("/api/test")
 	public String apiTest() {
-		try{
-			GpxParser gpx = new GpxParser();
-			gpx.write("test.gpx");
-		} catch (Exception e) {
-			return e.getMessage();
-		}
 		return "API Test Success";
 	}
 
@@ -43,10 +41,22 @@ public class GpxAnalayzerApplication {
 	public String apiTestRead() {
 		try{
 			GpxParser gpx = new GpxParser();
-			gpx.read("test.gpx");
-		} catch (Exception e) {
-			return e.getMessage();
+			List<GPXPoint> output = gpx.read("../GPXData/test.gpx");
+
+			GsonBuilder gsonBuilder = new GsonBuilder();
+			gsonBuilder.registerTypeAdapter(GPXPoint.class, TypeAdapters.GPXPOINT_TYPEADAPTER);
+			Gson gson = gsonBuilder.create();
+
+			// final Gson gson = gsonBuilder.create();
+			// String result = gson.toJson(output);
+			String result = TypeAdapters
+												.builder
+												.addTypeAdapter(TypeAdapters.GPXPOINT_TYPEADAPTER)
+												.toJson(output);
+			return "API Test Read Success\nResult: \n" + result;
+		} catch (IOException e) {
+			return "file not found: " + e.getMessage();
 		}
-		return "API Test Read Success";
 	}
 }
+

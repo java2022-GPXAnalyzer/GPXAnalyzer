@@ -1,8 +1,16 @@
 package com.fuyajo.GPXAnalayzer.parser;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
-import io.jenetics.jpx.*;
+import io.jenetics.jpx.GPX;
+import io.jenetics.jpx.Track;
+import io.jenetics.jpx.TrackSegment;
+import io.jenetics.jpx.WayPoint;
+
+import com.fuyajo.GPXAnalayzer.database.GPXPoint;
 
 public class GpxParser {
   
@@ -23,8 +31,25 @@ public class GpxParser {
     GPX.write(gpx, Path.of(filename));
   }
 
-  public void read(String filename) throws IOException{
+  public List<GPXPoint> read(String filename) throws IOException{
     System.out.println(filename);
     gpx = GPX.read(Path.of(filename));
+
+    var wrapper = new Object(){ List<GPXPoint> data = new ArrayList<>(); };
+
+    Consumer<WayPoint> analayzer = new Consumer<WayPoint>() {
+      @Override
+      public void accept(WayPoint t) {
+        wrapper.data.add(new GPXPoint(t, filename));
+      }
+    };
+
+    gpx.tracks()
+    .flatMap(Track::segments)
+    .flatMap(TrackSegment::points)
+    .forEach(analayzer);
+
+    return wrapper.data;
   }
+
 }
