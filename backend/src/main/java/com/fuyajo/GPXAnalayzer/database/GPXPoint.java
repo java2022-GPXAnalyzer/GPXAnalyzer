@@ -1,26 +1,14 @@
 package com.fuyajo.GPXAnalayzer.database;
 
-import java.util.UUID;
 import io.jenetics.jpx.WayPoint;
 
-public class GPXPoint {
+public class GPXPoint extends GPXData {
 
-  private final UUID id;
-  private final String name;
   private final WayPoint point;
 
-  public GPXPoint(WayPoint point, String name) {
-    this.id = UUID.randomUUID();
-    this.name = name;
+  public GPXPoint(String name, WayPoint point) {
+    super(name);
     this.point = point;
-  }
-
-  public UUID getId() {
-    return id;
-  }
-  
-  public String getName() {
-    return name;
   }
 
   public WayPoint getPoint() {
@@ -29,6 +17,6 @@ public class GPXPoint {
 
   @Override
   public String toString() {
-    return "GPXPoint [id=" + id + ", point=" + point + "]";
+    return "GPXPoint [id=" + getUUID() + ", point=" + point + "]";
   }
 }

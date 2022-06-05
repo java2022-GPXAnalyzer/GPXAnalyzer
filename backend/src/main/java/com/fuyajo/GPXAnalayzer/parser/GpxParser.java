@@ -10,6 +10,7 @@ import io.jenetics.jpx.Track;
 import io.jenetics.jpx.TrackSegment;
 import io.jenetics.jpx.WayPoint;
 
+import com.fuyajo.GPXAnalayzer.database.GPXMap;
 import com.fuyajo.GPXAnalayzer.database.GPXPoint;
 
 public class GpxParser {
@@ -31,16 +32,16 @@ public class GpxParser {
     GPX.write(gpx, Path.of(filename));
   }
 
-  public List<GPXPoint> read(String filename) throws IOException{
+  public GPXMap read(String filename) throws IOException{
     System.out.println(filename);
     gpx = GPX.read(Path.of(filename));
 
-    var wrapper = new Object(){ List<GPXPoint> data = new ArrayList<>(); };
+    var wrapper = new Object(){ GPXMap data = new GPXMap(filename, gpx.getCreator(), gpx.getMetadata().orElse(null)); };
 
     Consumer<WayPoint> analayzer = new Consumer<WayPoint>() {
       @Override
       public void accept(WayPoint t) {
-        wrapper.data.add(new GPXPoint(t, filename));
+        wrapper.data.add(new GPXPoint(t.getName().orElse(null), t));
       }
     };
 

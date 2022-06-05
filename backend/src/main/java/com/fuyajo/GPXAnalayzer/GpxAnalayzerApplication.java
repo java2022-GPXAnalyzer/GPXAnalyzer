@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
 import com.fuyajo.GPXAnalayzer.parser.GpxParser;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.fuyajo.GPXAnalayzer.database.GPXPoint;
+import com.fuyajo.GPXAnalayzer.database.GPXMap;
 
 @SpringBootApplication
 @RestController
@@ -41,17 +39,12 @@ public class GpxAnalayzerApplication {
 	public String apiTestRead() {
 		try{
 			GpxParser gpx = new GpxParser();
-			List<GPXPoint> output = gpx.read("../GPXData/test.gpx");
-
-			GsonBuilder gsonBuilder = new GsonBuilder();
-			gsonBuilder.registerTypeAdapter(GPXPoint.class, TypeAdapters.GPXPOINT_TYPEADAPTER);
-			Gson gson = gsonBuilder.create();
-
-			// final Gson gson = gsonBuilder.create();
-			// String result = gson.toJson(output);
-			String result = TypeAdapters
-												.builder
-												.addTypeAdapter(TypeAdapters.GPXPOINT_TYPEADAPTER)
+			GPXMap output = gpx.read("../GPXData/test.gpx");
+			String result = new TypeAdapters.Builder()
+												.addTypeAdapter(TypeAdapters.enumTypeAdapter.INSTANT_TIME)
+												.addTypeAdapter(TypeAdapters.enumTypeAdapter.POINT)
+												.setPrettyPrinting()
+												.build()
 												.toJson(output);
 			return "API Test Read Success\nResult: \n" + result;
 		} catch (IOException e) {
@@ -59,4 +52,3 @@ public class GpxAnalayzerApplication {
 		}
 	}
 }
-
