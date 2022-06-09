@@ -1,14 +1,17 @@
 <template>
-  <div id="cesiumContainer" />
+  <div id="cesiumContainer"></div>
 </template>
 <script setup>
-  // import * as Cesium from 'cesium';
-  import { Viewer } from 'cesium'
+  import { Viewer } from 'cesium';
+  import { onMounted } from 'vue';
 
-  const viewer = new Viewer('cesiumContainer');
+  onMounted(() => {
+    const viewer = new Viewer('cesiumContainer');
+    console.log(viewer)
+  })
 
 </script>
-<style lang="">
+<style>
   #cesiumContainer {
     width: 100%;
     height: 100%;
