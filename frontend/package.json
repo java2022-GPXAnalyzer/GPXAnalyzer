@@ -1,15 +1,33 @@
 {
   "name": "frontend",
-  "private": true,
   "version": "0.0.0",
-  "main": "electron/main.js",
+  "private": true,
   "scripts": {
-    "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "dev": "vite",
     "electron": "wait-on tcp:3000 && SET NODE_ENV=development&& electron .",
+    "electron:build": "vite build && electron-builder",
     "electron:serve": "concurrently -k \"yarn dev\" \"yarn electron\"",
-    "electron:build": "vite build && electron-builder"
+    "preview": "vite preview"
+  },
+  "main": "electron/main.js",
+  "dependencies": {
+    "cesium": "*",
+    "vue": "^3.2.25",
+    "vue-router": "4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.3",
+    "autoprefixer": "^10.4.7",
+    "concurrently": "^7.1.0",
+    "cross-env": "^7.0.3",
+    "electron": "^18.2.3",
+    "electron-builder": "^23.0.3",
+    "postcss": "^8.4.13",
+    "tailwindcss": "^3.0.24",
+    "vite": "^2.9.9",
+    "vue-cli-plugin-cesium": "~1.1.7",
+    "wait-on": "^6.0.1"
   },
   "build": {
     "appId": "com.fuyajo.gpx-analyzer",
@@ -41,21 +59,5 @@
       "buildResources": "assets",
       "output": "dist_electron"
     }
-  },
-  "dependencies": {
-    "vue": "^3.2.25",
-    "vue-router": "4"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^2.3.3",
-    "autoprefixer": "^10.4.7",
-    "concurrently": "^7.1.0",
-    "cross-env": "^7.0.3",
-    "electron": "^18.2.3",
-    "electron-builder": "^23.0.3",
-    "postcss": "^8.4.13",
-    "tailwindcss": "^3.0.24",
-    "vite": "^2.9.9",
-    "wait-on": "^6.0.1"
   }
 }
