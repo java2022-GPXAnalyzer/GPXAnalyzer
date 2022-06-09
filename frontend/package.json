@@ -12,21 +12,21 @@
   },
   "main": "electron/main.js",
   "dependencies": {
-    "cesium": "*",
     "vue": "^3.2.25",
     "vue-router": "4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
     "autoprefixer": "^10.4.7",
+    "cesium": "^1.94.2",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
     "electron": "^18.2.3",
     "electron-builder": "^23.0.3",
     "postcss": "^8.4.13",
     "tailwindcss": "^3.0.24",
-    "vite": "^2.9.9",
-    "vue-cli-plugin-cesium": "~1.1.7",
+    "vite": "^2.9.10",
+    "vite-plugin-cesium": "^1.2.19",
     "wait-on": "^6.0.1"
   },
   "build": {
