@@ -13,6 +13,7 @@
   "main": "electron/main.js",
   "dependencies": {
     "vue": "^3.2.25",
+    "vue-axios": "^3.4.1",
     "vue-router": "4"
   },
   "devDependencies": {
