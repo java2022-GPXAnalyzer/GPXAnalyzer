@@ -13,9 +13,13 @@ import io.jenetics.jpx.WayPoint;
 import com.fuyajo.GPXAnalayzer.database.GPXMap;
 import com.fuyajo.GPXAnalayzer.database.GPXPoint;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class GpxParser {
   
   private GPX gpx;
+  private static final Logger logger = LoggerFactory.getLogger(GpxParser.class);
 
   public GpxParser() {
     gpx = GPX.builder("fuyajo")
@@ -28,7 +32,7 @@ public class GpxParser {
   }
 
   public void write(String filename) throws IOException{
-    System.out.println(filename);
+    logger.info("Writing gpx to file: " + filename);
     GPX.write(gpx, Path.of(filename));
   }
 
