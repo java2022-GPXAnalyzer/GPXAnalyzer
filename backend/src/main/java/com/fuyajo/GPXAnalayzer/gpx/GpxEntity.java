@@ -1,12 +1,12 @@
-package com.fuyajo.GPXAnalayzer.database;
+package com.fuyajo.GPXAnalayzer.gpx;
 
 import java.util.UUID;
 
-public class GPXData {
+public class GpxEntity {
   private final UUID uuid;
   protected final String name;
 
-  public GPXData(String name) {
+  public GpxEntity(String name) {
     this.uuid = UUID.randomUUID();
     this.name = name;
   }

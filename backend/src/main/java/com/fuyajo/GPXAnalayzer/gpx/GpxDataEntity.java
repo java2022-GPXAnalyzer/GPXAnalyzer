@@ -1,4 +1,4 @@
-package com.fuyajo.GPXAnalayzer.database;
+package com.fuyajo.GPXAnalayzer.gpx;
 
 import java.util.List;
 import java.time.Instant;
@@ -7,9 +7,9 @@ import io.jenetics.jpx.Metadata;
 
 import java.util.ArrayList;
 
-public class GPXMap extends GPXData {
+public class GpxDataEntity extends GpxEntity {
 
-  private List<GPXPoint> points;
+  private List<WayPointEntity> points;
   private final String creator;
   private final String author;
   private final String bounds;
@@ -19,7 +19,7 @@ public class GPXMap extends GPXData {
   private final Instant time;
   private String filename;
 
-  public GPXMap(String filename, String creator, Metadata result) {
+  public GpxDataEntity(String filename, String creator, Metadata result) {
     super(result != null ? result.getName().orElse("null") : "null");
     this.filename = filename;
     this.creator = creator;
@@ -42,11 +42,11 @@ public class GPXMap extends GPXData {
     }
   }
 
-  public List<GPXPoint> getPoints() {
+  public List<WayPointEntity> getPoints() {
     return points;
   }
 
-  public void add(GPXPoint point) {
+  public void add(WayPointEntity point) {
     points.add(point);
   }
 

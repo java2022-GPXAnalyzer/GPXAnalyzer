@@ -1,12 +1,12 @@
-package com.fuyajo.GPXAnalayzer.database;
+package com.fuyajo.GPXAnalayzer.gpx;
 
 import io.jenetics.jpx.WayPoint;
 
-public class GPXPoint extends GPXData {
+public class WayPointEntity extends GpxEntity {
 
   private final WayPoint point;
 
-  public GPXPoint(String name, WayPoint point) {
+  public WayPointEntity(String name, WayPoint point) {
     super(name);
     this.point = point;
   }

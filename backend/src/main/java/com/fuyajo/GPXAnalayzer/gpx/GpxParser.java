@@ -1,17 +1,15 @@
-package com.fuyajo.GPXAnalayzer.parser;
+package com.fuyajo.GPXAnalayzer.gpx;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+
 import io.jenetics.jpx.GPX;
 import io.jenetics.jpx.Track;
 import io.jenetics.jpx.TrackSegment;
 import io.jenetics.jpx.WayPoint;
-
-import com.fuyajo.GPXAnalayzer.database.GPXMap;
-import com.fuyajo.GPXAnalayzer.database.GPXPoint;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +34,16 @@ public class GpxParser {
     GPX.write(gpx, Path.of(filename));
   }
 
-  public GPXMap read(String filename) throws IOException{
-    System.out.println(filename);
+  public GpxDataEntity read(String filename) throws IOException{
+    logger.info("Reading gpx from file: " + filename);
     gpx = GPX.read(Path.of(filename));
 
-    var wrapper = new Object(){ GPXMap data = new GPXMap(filename, gpx.getCreator(), gpx.getMetadata().orElse(null)); };
+    var wrapper = new Object(){ GpxDataEntity data = new GpxDataEntity(filename, gpx.getCreator(), gpx.getMetadata().orElse(null)); };
 
     Consumer<WayPoint> analayzer = new Consumer<WayPoint>() {
       @Override
       public void accept(WayPoint t) {
-        wrapper.data.add(new GPXPoint(t.getName().orElse(null), t));
+        wrapper.data.add(new WayPointEntity(t.getName().orElse(null), t));
       }
     };
 

@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Instant;
 
-import com.fuyajo.GPXAnalayzer.database.GPXPoint;
-
+import com.fuyajo.GPXAnalayzer.gpx.WayPointEntity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
@@ -36,7 +35,7 @@ public final class TypeAdapters {
   private static Type getTypeClass(enumTypeAdapter type){
     switch(type){
       case GPXPOINT:
-        return GPXPoint.class;
+        return WayPointEntity.class;
       case POINT:
         return WayPoint.class;
       case INSTANT_TIME:
@@ -65,9 +64,9 @@ public final class TypeAdapters {
     }
   }
 
-  private static class GPXPointTypeAdapter extends TypeAdapter<GPXPoint>{
+  private static class GPXPointTypeAdapter extends TypeAdapter<WayPointEntity>{
     @Override
-    public void write(final JsonWriter out, final GPXPoint value) throws IOException {
+    public void write(final JsonWriter out, final WayPointEntity value) throws IOException {
       out.beginObject();
         out.name("uuid").value(value.getUUID().toString());
         out.name("name").value(value.getName());
@@ -80,7 +79,7 @@ public final class TypeAdapters {
     }
     
     @Override
-    public GPXPoint read(JsonReader in) throws IOException {
+    public WayPointEntity read(JsonReader in) throws IOException {
       return null;
     }
   }

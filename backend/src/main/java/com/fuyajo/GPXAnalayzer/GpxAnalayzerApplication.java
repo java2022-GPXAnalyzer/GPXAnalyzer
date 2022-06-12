@@ -8,8 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
-import com.fuyajo.GPXAnalayzer.parser.GpxParser;
-import com.fuyajo.GPXAnalayzer.database.GPXMap;
+import com.fuyajo.GPXAnalayzer.gpx.GpxDataEntity;
+import com.fuyajo.GPXAnalayzer.gpx.GpxParser;
 
 @SpringBootApplication
 @RestController
@@ -39,7 +39,7 @@ public class GpxAnalayzerApplication {
 	public String apiTestRead() {
 		try{
 			GpxParser gpx = new GpxParser();
-			GPXMap output = gpx.read("../GPXData/test.gpx");
+			GpxDataEntity output = gpx.read("../GPXData/test.gpx");
 			String result = new TypeAdapters.Builder()
 												.addTypeAdapter(TypeAdapters.enumTypeAdapter.INSTANT_TIME)
 												.addTypeAdapter(TypeAdapters.enumTypeAdapter.POINT)
