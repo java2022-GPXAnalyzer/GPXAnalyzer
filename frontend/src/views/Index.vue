@@ -1,14 +1,17 @@
 <template>
-  <button @click="test">{{ value }} + 1000</button>
+  <button 
+    @click="backToInit" 
+    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">back</button>
   <cesium-map />
 </template>
 <script setup>
+  import { useRouter, useRoute } from 'vue-router'
   import cesiumMap from '@/components/cesiumMap.vue'
-  import { ref } from 'vue' 
 
-  const value = ref(2000)
-  const test = () => {
-    value.value += 1000
+  const router = useRouter();
+  
+  function backToInit() {
+    router.push('/');
   }
 </script>
 <style lang="">

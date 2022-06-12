@@ -1,11 +1,6 @@
 <template>
-  <div>
-    <h1>test nav</h1>
-    <router-link to="/" class="ml-5">init</router-link>
-    <router-link to="/index" class="ml-5">index</router-link>
-  </div>
   <router-view></router-view>
-</template>
+</template> 
 
 <script setup>
 </script>

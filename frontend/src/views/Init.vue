@@ -16,13 +16,20 @@
           />
         </label>
       </form>
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="goToIndex">
+        Go to the map
+      </button>
     </div>
   </div>
 </template>
-<script>
-export default {
+<script setup>
+  import { useRouter } from 'vue-router';
   
-}
+  const router = useRouter();
+  
+  function goToIndex() {
+    router.push('/index');
+  }
 </script>
 <style lang="">
   
