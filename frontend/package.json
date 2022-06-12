@@ -5,6 +5,7 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "cesium-fix": "node ./cesium-fix.js",
     "electron": "wait-on tcp:3000 && SET NODE_ENV=development&& electron .",
     "electron:build": "vite build && electron-builder",
     "electron:serve": "concurrently -k \"yarn dev\" \"yarn electron\"",
@@ -12,13 +13,14 @@
   },
   "main": "electron/main.js",
   "dependencies": {
+    "axios": "^0.27.2",
     "vue": "^3.2.25",
-    "vue-axios": "^3.4.1",
     "vue-router": "4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
     "autoprefixer": "^10.4.7",
+    "axios-mock-adapter": "^1.21.1",
     "cesium": "^1.94.2",
     "concurrently": "^7.1.0",
     "cross-env": "^7.0.3",
