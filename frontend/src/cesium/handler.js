@@ -23,17 +23,28 @@ export class Handler{
       (e) => this.mouseMove(e), Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   }
 
+  timeout = null;
+
   click(e){
-    let pick = this.#viewer.scene.pick(e.position);
-    let ray = this.#viewer.camera.getPickRay(e.position);
-    let cartesian = this.#viewer.scene.globe.pick(ray, this.#viewer.scene);
-    // console.log(CesiumUtility.convertToWGS(cartesian));
-    if (Cesium.defined(pick)){
-      var id = Cesium.defaultValue(pick.id, pick.primitive.id);
-      if (id instanceof Cesium.Entity) {
-        console.log(id._id)
-      }
+    if(this.timeout){
+      clearTimeout(this.timeout);
+      this.timeout = null;
+      return;
     }
+    this.timeout = setTimeout(() => {
+      let pick = this.#viewer.scene.pick(e.position);
+      let ray = this.#viewer.camera.getPickRay(e.position);
+      let cartesian = this.#viewer.scene.globe.pick(ray, this.#viewer.scene);
+      this.emi.callClick(pick, cartesian);
+      if (Cesium.defined(pick)){
+        var id = Cesium.defaultValue(pick.id, pick.primitive.id);
+        if (id instanceof Cesium.Entity) {
+          console.log(id._id)
+        }
+      }
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }, 250);
   }
 
   leftDown(e){
@@ -47,6 +58,7 @@ export class Handler{
   }
 
   leftUp(e){
+    if(this.pointDraged) this.emi.reDrawLine(this.pointDraged.id._id);
     this.leftDownFlag = false;
     this.pointDraged = null;
     this.#viewer.scene.screenSpaceCameraController.enableInputs = true;
@@ -56,10 +68,7 @@ export class Handler{
     if (this.leftDownFlag === true && this.pointDraged != null) {
       let ray = this.#viewer.camera.getPickRay(e.endPosition);
       let cartesian = this.#viewer.scene.globe.pick(ray, this.#viewer.scene);
-      this.pointDraged.id.position = new Cesium.CallbackProperty(function () {
-        return cartesian;
-      }, false);
-      this.emi.updatePoint(this.pointDraged.id._id, CesiumUtility.convertToWGS(cartesian));
+      this.emi.updateGpxPoint(this.pointDraged.id._id, CesiumUtility.convertToWGS(cartesian));
     }
   }
 }

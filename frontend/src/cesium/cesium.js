@@ -34,6 +34,22 @@ export class CesiumUtility {
     return viewer.scene.globe.getHeight(cartographic);
     // return Cesium.Cartographic.fromDegrees(lng, lat).height;
   }
+
+  static convertPositionFromWGS(position) {
+    return Cesium.Cartesian3.fromDegrees(position.lng, position.lat, position.ele);
+  }
+
+  static _uuid() {
+    var d = Date.now();
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function'){
+      d += performance.now(); //use high-precision timer if available
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = (d + Math.random() * 16) % 16 | 0;
+      d = Math.floor(d / 16);
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
 }
 
 export class WayPoint {
@@ -83,11 +99,30 @@ export class WayPoint {
     return this.uuid;
   }
 
+  _updatePosition(position){
+    this.lat = position.lat;
+    this.lng = position.lng;
+    this.ele = position.ele;
+    this.position = Cesium.Cartesian3.fromDegrees(this.lng, this.lat, this.ele);
+    return this.position;
+  }
+
   update(pointData){
-    cartesian = pointData.cartesian;
-    this.entity.id.position = new Cesium.CallbackProperty(() => {
+    let cartesian = this._updatePosition(pointData);
+    this.entity.position = new Cesium.CallbackProperty(() => {
       return cartesian;
     }, false);
+  }
+
+  toJson(){
+    return {
+      uuid: this.uuid,
+      lng: this.lng,
+      lat: this.lat,
+      ele: this.ele,
+      time: Cesium.JulianDate.toIso8601(this.time),
+      name: this.name,
+    };
   }
 }
 
@@ -154,13 +189,30 @@ export class GpxMap {
     return this.endTime.clone();
   }
 
-  findPoints(id) {
-    return this.#viewer.entities.getById(id);
+  getId(){
+    return this.uuid;
   }
 
-  addPoint(items, pointData) {
+  findPoints(id) {
+    // return this.#viewer.entities.getById(id);
+    return this.trkPoints.find((point) => {
+      return point.getId() === id;
+    }) || this.wayPoints.find((point) => {
+      return point.getId() === id;
+    });
+  }
+
+  addPoint(item, pointData) {
+    pointData = CesiumUtility.convertToWGS(pointData);
+    pointData.time = (new Date()).toISOString();
+    pointData.uuid = CesiumUtility._uuid();
     var point = new WayPoint(this.#viewer, pointData);
-    this[items].push(point);
+    this[item].push(point);
+    if(item == "trkPoints") {
+      this.endTime = Cesium.JulianDate.fromIso8601(pointData.time);
+      this.activeTime();
+      this.reDrawLine();
+    }
     return point;
   }
 
@@ -169,10 +221,21 @@ export class GpxMap {
     if(point) point.update(pointData);
   }
 
+  updateGpxInfo(gpxInfo){
+    this.name = gpxInfo.name;
+    this.creator = gpxInfo.creator;
+    this.version = gpxInfo.version;
+  }
+
   drawLine() {
     let property = new Cesium.SampledPositionProperty();
     this.trkPoints.forEach((point) => {
       point.addProperty(property);
+    });
+
+    let test =  new Cesium.TimeInterval({
+      start: this.startTime,
+      stop: this.endTime,
     });
 
     this.entityInfo = {
@@ -199,6 +262,11 @@ export class GpxMap {
     this.#isDrawed = true;
   }
 
+  reDrawLine() {
+    this.#viewer.entities.remove(this.entity);
+    this.drawLine();
+  }
+
   getEntityInfo() {
     return this.entityInfo;
   }
@@ -220,6 +288,29 @@ export class GpxMap {
     }) || this.wayPoints.find((point) => {
       return point.getId() === id;
     });
+  }
+
+  toJson(){
+    return {
+      gpxInfo:{
+        uuid: this.uuid,
+        name: this.name,
+        creator: this.creator,
+        version: this.version,
+        startTime: this.startTime.toString(),
+        endTime: this.endTime.toString(),
+      },
+      trackPoints:[
+        ...this.trkPoints.map((point) => {
+          return point.toJson();
+        })
+      ],
+      wayPoints:[
+        ...this.wayPoints.map((point) => {
+          return point.toJson();
+        })
+      ]
+    }
   }
 
   // Test

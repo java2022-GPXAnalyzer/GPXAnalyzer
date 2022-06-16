@@ -22,6 +22,10 @@ export const getGpxInfoAPI = (id) => gpxMapRequest.get(id + '/gpxInfo');
 export const getGpxTrackPointsAPI = (id) => gpxMapRequest.get(id + '/trackPoints');
 export const getGpxWayPointsAPI = (id) => gpxMapRequest.get(id + '/wayPoints');
 
+export const postGpxFilePathAPI = (filepaths) => gpxMapRequest.post('', filepaths);
+export const putGpxAPI = (gpx) => gpxMapRequest.put(gpx);
+export const putGpxAPIForId = (id, gpx) => gpxMapRequest.put(id, gpx);
+
 // MOCK DATA
 
 const MOCkData = {
@@ -31,27 +35,27 @@ const MOCkData = {
       lng: '120.178',
       lat: '23.566',
       ele: '5550',
-      time: '2020-01-01T00:00:00Z',
+      time: '2021-06-16T00:00:00Z',
     },
     {
       uuid: 'sdgs2',
       lng: '120.978',
       lat: '24.566',
       ele: '5550',
-      time: '2020-01-01T00:00:05Z',
+      time: '2021-06-16T00:00:05Z',
     },
     {
       uuid: 'sdgs3',
       lng: '121.578',
       lat: '24.5166',
       ele: '5550',
-      time: '2020-01-01T00:00:10Z',
+      time: '2021-06-16T00:00:10Z',
     },
   ],
   uuid: 'testMap',
   name: 'testMap',
-  startTime: '2020-01-01T00:00:00Z',
-  endTime: '2020-01-01T00:00:10Z',
+  startTime: '2021-06-16T00:00:00Z',
+  endTime: '2021-06-16T00:00:10Z',
   creator: 'test',
   version: '1.0',
 };
