@@ -13,8 +13,13 @@
     <div class="container flex justify-evenly">
       <div class="w-28 h-full round-none border-2 border-black">
         <p class="title">Map</p>
-        <div>
-          <button @click="openLayer" class="layer">Main layer</button>
+        <div v-for="(map, index) in tmpMap.maps" :key="index">
+          {{ map.name }}
+          <ul>
+            <li v-for="(point, pointIndex) in map.points" :key="pointIndex" @click="test(pointIndex)">
+              {{point.uuid}}
+            </li>
+          </ul>
         </div>
         <!-- <layer></layer> -->
       </div>
@@ -26,11 +31,11 @@
         <div class="flex-col divide-y-2">
           <div class="subtitle">
             <p>Name</p>
-            <span class="data">{{ state.mode }}</span>
+            <span class="data">{{ state.uuid }}</span>
           </div>
           <div class="subtitle">
             <p>StartTime</p>
-            <span class="data">{{ state.mode }}</span>
+            <span class="data">{{ state.name }}</span>
           </div>
           <div class="subtitle">
             <p>EndTime</p>
@@ -56,6 +61,43 @@ import { eventManager } from '@/cesium/eventManager';
 const state = reactive({
   name: '',
   mode: 0,
+  uuid: '',
+  name: '',
+});
+
+const tmpMap = reactive({
+  maps: [
+    {
+      points: [
+        {
+          uuid: 'sdgs',
+          lng: '120.178',
+          lat: '23.566',
+          ele: '5550',
+          time: '2020-01-01T00:00:00Z',
+        },
+        {
+          uuid: 'sdgs2',
+          lng: '120.978',
+          lat: '24.566',
+          ele: '5550',
+          time: '2020-01-01T00:00:05Z',
+        },
+        {
+          uuid: 'sdgs3',
+          lng: '121.578',
+          lat: '24.5166',
+          ele: '5550',
+          time: '2020-01-01T00:00:10Z',
+        },
+      ],
+      uuid: 'testMap',
+      name: 'testMap',
+      startTime: '2020-01-01T00:00:00Z',
+      endTime: '2020-01-01T00:00:10Z',
+      creator: 'test',
+    }
+  ] 
 });
 
 const emi = eventManager.getInstance();
@@ -139,7 +181,9 @@ function add() {
   // state.mode = 0;
 }
 
-function test() {
+function test(pointIndex) {
+  let data = tmpMap.maps[0].points[pointIndex];
+  state.uuid = data.uuid;
 }
 
 function openLayer() {
