@@ -1,25 +1,32 @@
 <template>
   <div>
-    <div class="border-2 rounded-lg border-blue-400 justify-center box-content w-2/3 mx-auto mt-1">
-      <button @click="track" class="button">track</button>
-      <button @click="begin" class="button">begin</button>
+    <div class="border-2 rounded-lg border-blue-400 justify-center box-content w-2/3 mx-auto mt-1 flex">
+      <button @click="track" class="button">
+        track
+      </button>
+      <button @click="begin" class="button">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span> begin</span>
+      </button>
       <button @click="stop" class="button">stop</button>
       <button @click="reset" class="button">reset</button>
       <button @click="addGPXFromJson" class="button">add</button>
       <button @click="test" class="button">test</button>
       <button><img src="../assets/logo.png" class="mt-auto py-auto px-auto w-10 rounded border-2 border-blue-400"></button>
     </div>
-    <p>{{ state.mode }}</p>
     <div class="container flex justify-evenly">
       <div class="w-28 h-full round-none border-2 border-black">
         <p class="title">Map</p>
-        <div v-for="(map, index) in tmpMap.maps" :key="index">
-          {{ map.name }}
-          <ul>
+        <div v-for="(map, index) in tmpMap.maps" :key="index"
+        style="cursor:pointer;">
+          <div  @click="map.show=!map.show">{{ map.name }}</div>
+          <Transition>
+          <ul v-if="map.show">
             <li v-for="(point, pointIndex) in map.points" :key="pointIndex" @click="test(pointIndex)">
               {{point.uuid}}
             </li>
           </ul>
+          </Transition>
         </div>
         <!-- <layer></layer> -->
       </div>
@@ -91,6 +98,7 @@ const tmpMap = reactive({
           time: '2020-01-01T00:00:10Z',
         },
       ],
+      show: false,
       uuid: 'testMap',
       name: 'testMap',
       startTime: '2020-01-01T00:00:00Z',
@@ -194,7 +202,7 @@ function openLayer() {
 <style>
 .container {
   width: 100%;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 93px);
   margin: 20px auto 0;
 }
 #cesiumContainer {
@@ -205,7 +213,8 @@ function openLayer() {
   overflow: hidden;
 }
 .button {
-  @apply m-3 py-2 px-4 hover:bg-red-400 hover:text-white
+  @apply m-3 py-2 px-4 hover:bg-red-400 hover:text-white;
+  display: flex;
 }
 .title {
   @apply text-2xl font-sans border-b-2 border-black
@@ -218,5 +227,14 @@ function openLayer() {
 }
 .layer {
   @apply font-sans rounded-md border-2 border-black m-4 hover:bg-black hover:text-white
+}
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>
