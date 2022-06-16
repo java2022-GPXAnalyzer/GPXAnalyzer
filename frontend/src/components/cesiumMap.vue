@@ -1,13 +1,48 @@
 <template>
-  <button @click="track" class="m-3">track</button>
-  <button @click="begin" class="m-3">begin</button>
-  <button @click="stop" class="m-3">stop</button>
-  <button @click="reset" class="m-3">reset</button>
-  <button @click="addGPXFromJson" class="m-3">add</button>
-  <button @click="test" class="m-3">test</button>
-  <p>{{ state.mode }}</p>
-  <div class="container">
-    <div id="cesiumContainer"></div>
+  <div>
+    <div class="border-2 rounded-lg border-blue-400 justify-center box-content w-2/3 mx-auto mt-1">
+      <button @click="track" class="button">track</button>
+      <button @click="begin" class="button">begin</button>
+      <button @click="stop" class="button">stop</button>
+      <button @click="reset" class="button">reset</button>
+      <button @click="addGPXFromJson" class="button">add</button>
+      <button @click="test" class="button">test</button>
+      <button><img src="../assets/logo.png" class="mt-auto py-auto px-auto w-10 rounded border-2 border-blue-400"></button>
+    </div>
+    <p>{{ state.mode }}</p>
+    <div class="container flex justify-evenly">
+      <div class="w-28 h-full round-none border-2 border-black">
+        <p class="title">Map</p>
+        <div>
+          <button @click="openLayer" class="layer">Main layer</button>
+        </div>
+        <!-- <layer></layer> -->
+      </div>
+
+      <div id="cesiumContainer"></div>
+      
+      <div class="w-28 h-full round-none border-2 border-black">
+        <p class="title">MapInfo</p>
+        <div class="flex-col divide-y-2">
+          <div class="subtitle">
+            <p>Name</p>
+            <span class="data">{{ state.mode }}</span>
+          </div>
+          <div class="subtitle">
+            <p>StartTime</p>
+            <span class="data">{{ state.mode }}</span>
+          </div>
+          <div class="subtitle">
+            <p>EndTime</p>
+            <span class="data">{{ state.mode }}</span>
+          </div>
+          <div class="subtitle">
+            <p>Creator</p>
+            <span class="data">{{ state.mode }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -16,6 +51,7 @@ import * as Cesium from 'cesium';
 import { onMounted, reactive } from 'vue';
 
 import { eventManager } from '@/cesium/eventManager';
+// import { layer } from '@/cesium/layer';
 
 const state = reactive({
   name: '',
@@ -105,6 +141,10 @@ function add() {
 
 function test() {
 }
+
+function openLayer() {
+  
+}
 </script>
 
 <style>
@@ -119,5 +159,20 @@ function test() {
   margin: auto;
   padding: 0;
   overflow: hidden;
+}
+.button {
+  @apply m-3 py-2 px-4 hover:bg-red-400 hover:text-white
+}
+.title {
+  @apply text-2xl font-sans border-b-2 border-black
+}
+.subtitle {
+  @apply text-xl font-sans flex-col
+}
+.data {
+  @apply text-xl font-sans my-auto
+}
+.layer {
+  @apply font-sans rounded-md border-2 border-black m-4 hover:bg-black hover:text-white
 }
 </style>
