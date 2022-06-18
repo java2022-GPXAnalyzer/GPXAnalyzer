@@ -1,15 +1,12 @@
 package com.fuyajo.GPXAnalayzer;
 
 import java.io.IOException;
-import java.util.List;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
-import com.fuyajo.GPXAnalayzer.gpx.GpxFileHandler;
 import com.fuyajo.GPXAnalayzer.gpx.GpxCollector;
 
 import org.slf4j.Logger;
