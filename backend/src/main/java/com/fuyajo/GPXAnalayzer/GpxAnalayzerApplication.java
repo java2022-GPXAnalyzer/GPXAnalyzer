@@ -8,13 +8,21 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
-import com.fuyajo.GPXAnalayzer.gpx.GpxDataEntity;
-import com.fuyajo.GPXAnalayzer.gpx.GpxParser;
+import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
+import com.fuyajo.GPXAnalayzer.gpx.GpxFileHandler;
+import com.fuyajo.GPXAnalayzer.gpx.GpxCollector;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SpringBootApplication
 @RestController
 @RequestMapping(produces=MediaType.APPLICATION_JSON_VALUE)
 public class GpxAnalayzerApplication {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(GpxAnalayzerApplication.class);
+
+  private GpxCollector gpxCollector = new GpxCollector();
 
 	public static void main(String[] args) {
 		SpringApplication.run(GpxAnalayzerApplication.class, args);
@@ -30,25 +38,24 @@ public class GpxAnalayzerApplication {
 		return "Hello " + name;
 	}
 
-	@GetMapping("/api/test")
-	public String apiTest() {
-		return "API Test Success";
-	}
+  @GetMapping("/gpxApi/gpx/{gpxId}")
+  public String getGpxJson(@PathVariable("gpxId") String gpxId) {
+    GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
+    if (gpx == null) {
+      return "";
+    }
+    return gpx.toJson();
+  }
 
-	@GetMapping("/api/test/read")
-	public String apiTestRead() {
-		try{
-			GpxParser gpx = new GpxParser();
-			GpxDataEntity output = gpx.read("../GPXData/test.gpx");
-			String result = new TypeAdapters.Builder()
-												.addTypeAdapter(TypeAdapters.enumTypeAdapter.INSTANT_TIME)
-												.addTypeAdapter(TypeAdapters.enumTypeAdapter.POINT)
-												.setPrettyPrinting()
-												.build()
-												.toJson(output);
-			return "API Test Read Success\nResult: \n" + result;
-		} catch (IOException e) {
-			return "file not found: " + e.getMessage();
-		}
-	}
+  @PostMapping("gpxApi/uploadGpx")
+  public String uploadGpx(@RequestBody String gpxFilePath) {
+    try {
+      gpxCollector.addByFilepath(gpxFilePath);
+      return "API Test Upload Gpx Success\nGpx File Path: " + gpxFilePath
+        + "\nGpx Entity UUID: " + gpxCollector.getLast().getUuid();
+    } catch (IOException e) {
+      return "API Test Upload Gpx Failed\nError: \n" + e;
+    }
+  }
+
 }

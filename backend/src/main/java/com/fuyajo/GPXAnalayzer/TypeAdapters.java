@@ -68,12 +68,12 @@ public final class TypeAdapters {
     @Override
     public void write(final JsonWriter out, final WayPointEntity value) throws IOException {
       out.beginObject();
-        out.name("uuid").value(value.getUUID().toString());
-        out.name("name").value(value.getName());
+        out.name("uuid").value(value.getUuid().toString());
+        // out.name("name").value(value.getName());
         out.name("point").beginObject();
-          out.name("latitude").value(value.getPoint().getLatitude());
-          out.name("longitude").value(value.getPoint().getLongitude());
-          out.name("time").value(value.getPoint().getTime().orElse(null).toString());
+          // out.name("latitude").value(value.getPoint().getLatitude());
+          // out.name("longitude").value(value.getPoint().getLongitude());
+          // out.name("time").value(value.getPoint().getTime().orElse(null).toString());
         out.endObject();
       out.endObject();
     }
