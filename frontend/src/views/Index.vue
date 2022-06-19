@@ -3,7 +3,6 @@
     <button 
       @click="backToInit" 
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">back</button>
-    <!-- <div class="box-border h-32 w-32 p-4 border-4"></div> -->
     <cesium-map />
   </div>
 </template>
