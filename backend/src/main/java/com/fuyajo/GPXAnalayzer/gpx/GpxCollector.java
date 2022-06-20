@@ -11,6 +11,11 @@ public class GpxCollector {
   public GpxCollector() {}
 
   public void addByFilepath(String filepath) throws IOException {
+    for (GpxEntity gpx : gpxEntities) {
+      if (gpx.getFilepath().equals(filepath)) {
+        throw new IOException("Gpx File Path Already Exists");
+      }
+    }
     GpxEntity gpx = new GpxEntity(filepath);
     gpxEntities.add(gpx);
   }

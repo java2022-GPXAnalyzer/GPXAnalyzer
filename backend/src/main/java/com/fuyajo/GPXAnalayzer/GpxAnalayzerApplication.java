@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
 import com.google.gson.Gson;
@@ -52,13 +53,12 @@ public class GpxAnalayzerApplication {
   }
 
   @PostMapping("gpxApi/uploadGpx")
-  public String uploadGpx(@RequestBody String gpxFilePath) {
+  public ResponseEntity<?> uploadGpx(@RequestBody String gpxFilePath) {
     try {
       gpxCollector.addByFilepath(gpxFilePath);
-      return "API Test Upload Gpx Success\nGpx File Path: " + gpxFilePath
-        + "\nGpx Entity UUID: " + gpxCollector.getLast().getUuid();
+      return ResponseEntity.ok("OK, " + "uploaded gpx file uuid: " + gpxCollector.getLast().getUuid());
     } catch (IOException e) {
-      return "API Test Upload Gpx Failed\nError: \n" + e;
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
