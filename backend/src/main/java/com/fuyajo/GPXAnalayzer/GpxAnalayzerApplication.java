@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
+import com.google.gson.Gson;
 import com.fuyajo.GPXAnalayzer.gpx.GpxCollector;
 
 import org.slf4j.Logger;
@@ -34,6 +35,12 @@ public class GpxAnalayzerApplication {
 	public String hello(@RequestParam(value="name", defaultValue="World") String name) {
 		return "Hello " + name;
 	}
+
+  @GetMapping("/gpxApi/idList/")
+  public String getIdList() {
+    Gson gson = new Gson();
+    return gson.toJson(gpxCollector.getUuids());
+  }
 
   @GetMapping("/gpxApi/gpx/{gpxId}")
   public String getGpxJson(@PathVariable("gpxId") String gpxId) {

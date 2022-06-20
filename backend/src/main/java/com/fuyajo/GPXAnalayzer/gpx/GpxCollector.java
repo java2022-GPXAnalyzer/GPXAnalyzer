@@ -24,6 +24,14 @@ public class GpxCollector {
     return null;
   }
 
+  public List<String> getUuids() {
+    List<String> uuids = new ArrayList<>();
+    for (GpxEntity gpx : gpxEntities) {
+      uuids.add(gpx.getUuid().toString());
+    }
+    return uuids;
+  }
+
   public GpxEntity getLast() {
     return gpxEntities.get(gpxEntities.size() - 1);
   }
