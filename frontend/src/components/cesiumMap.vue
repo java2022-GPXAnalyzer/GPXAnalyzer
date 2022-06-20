@@ -3,7 +3,7 @@
   <button @click="begin" class="m-3">begin</button>
   <button @click="stop" class="m-3">stop</button>
   <button @click="reset" class="m-3">reset</button>
-  <button @click="addGPXFromJson" class="m-3">add</button>
+  <button @click="add" class="m-3">add</button>
   <button @click="test" class="m-3">test</button>
   <p>{{ state.mode }}</p>
   <div class="container">
@@ -13,7 +13,7 @@
 
 <script setup>
 import * as Cesium from 'cesium';
-import { onMounted, reactive } from 'vue';
+import { onMounted, reactive, watch, ref } from 'vue';
 
 import { eventManager } from '@/cesium/eventManager';
 
@@ -29,6 +29,13 @@ var viewer;
 // Cesium Setting
 Cesium.Ion.defaultAccessToken =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjNThmYjdjNi04MWU0LTQ3NDktOGVlMi05ZTVkNzExMWM0NGYiLCJpZCI6OTcxNDUsImlhdCI6MTY1NDkzMDE4NH0.1UyvbLY84Rmpj0IPPBHhyjEtqddTyz0Ovf0IhoKK0zA';
+
+const states = ref({
+  maps : null,
+});
+
+emi.showLoadingPercent(15, 'cesium loading...');
+
 
 onMounted(() => {
   viewer = new Cesium.Viewer('cesiumContainer', {
@@ -62,7 +69,7 @@ onMounted(() => {
   emi.setViewer(viewer)
     .buildGpxMaps()
     .initializeHandler();
-
+  emi.showLoadingPercent(60, 'cesium loading...');
 });
 
 // TEST
@@ -101,16 +108,21 @@ function add() {
   //   return;
   // }
   // state.mode = 0;
+  emi.toggleSpeedDistribution(0);
 }
 
 function test() {
+  // emi.toggleHover(0);
+  // emi.showalertMessage('test');
+  emi.showAlertMessage(1, 'test');
+  // emi.test();
 }
 </script>
 
 <style>
 .container {
   width: 100%;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 93px);
   margin: 20px auto 0;
 }
 #cesiumContainer {

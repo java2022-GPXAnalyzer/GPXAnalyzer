@@ -9,5 +9,14 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
+    <script>
+      window.onkeydown=function (e){
+        let ev = window.event || e;
+        let code = ev.keyCode || ev.which;
+        // if(code == 82 && (ev.metaKey || ev.ctrlKey)){
+        //   return false;
+        // }
+      }
+    </script>
   </body>
 </html>

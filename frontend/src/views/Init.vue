@@ -24,10 +24,15 @@
 </template>
 <script setup>
   import { useRouter } from 'vue-router';
+  import { eventManager } from '@/cesium/eventManager';
   const router = useRouter();
+  const emi = eventManager.getInstance();
   
   function goToIndex() {
-    router.push('/index');
+    emi.showLoading();
+    setTimeout(() => {
+      router.push('/index');
+    }, 500);
   }
 </script>
 <style lang="">

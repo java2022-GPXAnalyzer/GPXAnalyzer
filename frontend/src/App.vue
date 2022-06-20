@@ -1,8 +1,12 @@
 <template>
+  <loading></loading>
+  <alert></alert>
   <router-view></router-view>
 </template> 
 
 <script setup>
+import alert from '@/components/alert.vue';
+import loading from '@/components/loading.vue';
 </script>
 
 <style>

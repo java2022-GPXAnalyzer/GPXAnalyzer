@@ -35,12 +35,14 @@ export class Handler{
       let pick = this.#viewer.scene.pick(e.position);
       let ray = this.#viewer.camera.getPickRay(e.position);
       let cartesian = this.#viewer.scene.globe.pick(ray, this.#viewer.scene);
-      this.emi.callClick(pick, cartesian);
       if (Cesium.defined(pick)){
         var id = Cesium.defaultValue(pick.id, pick.primitive.id);
         if (id instanceof Cesium.Entity) {
           console.log(id._id)
-        }
+        }        
+      }
+      else{
+        this.emi.callClick(pick, cartesian);
       }
       clearTimeout(this.timeout);
       this.timeout = null;

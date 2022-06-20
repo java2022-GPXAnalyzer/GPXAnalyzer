@@ -23,7 +23,7 @@ export const getGpxTrackPointsAPI = (id) => gpxMapRequest.get(id + '/trackPoints
 export const getGpxWayPointsAPI = (id) => gpxMapRequest.get(id + '/wayPoints');
 
 export const postGpxFilePathAPI = (filepaths) => gpxMapRequest.post('', filepaths);
-export const putGpxAPI = (gpx) => gpxMapRequest.put(gpx);
+export const putGpxAPI = (gpx) => gpxMapRequest.put('', gpx);
 export const putGpxAPIForId = (id, gpx) => gpxMapRequest.put(id, gpx);
 
 // MOCK DATA
@@ -35,27 +35,41 @@ const MOCkData = {
       lng: '120.178',
       lat: '23.566',
       ele: '5550',
-      time: '2021-06-16T00:00:00Z',
+      time: '2022-06-16T00:00:00Z',
     },
     {
       uuid: 'sdgs2',
       lng: '120.978',
       lat: '24.566',
       ele: '5550',
-      time: '2021-06-16T00:00:05Z',
+      time: '2022-06-16T00:00:05Z',
     },
     {
       uuid: 'sdgs3',
       lng: '121.578',
       lat: '24.5166',
       ele: '5550',
-      time: '2021-06-16T00:00:10Z',
+      time: '2022-06-16T00:00:10Z',
+    },
+    {
+      uuid: 'sdgs4',
+      lng: '121.348',
+      lat: '23.5222',
+      ele: '5550',
+      time: '2022-06-16T00:00:15Z',
+    },
+    {
+      uuid: 'sdgs5',
+      lng: '121.588',
+      lat: '22.5566',
+      ele: '5550',
+      time: '2022-06-16T00:00:20Z',
     },
   ],
   uuid: 'testMap',
   name: 'testMap',
-  startTime: '2021-06-16T00:00:00Z',
-  endTime: '2021-06-16T00:00:10Z',
+  startTime: '2022-06-16T00:00:00Z',
+  endTime: '2022-06-16T00:00:20Z',
   creator: 'test',
   version: '1.0',
 };
@@ -82,4 +96,9 @@ mock.onGet("/gpxApi/gpx/testMap/wayPoints").reply(200, {
   status: 200,
   msg: '',
   result: null
+});
+
+mock.onPut("/gpxApi/gpx/").reply(function(config){
+  console.log(config.data);
+  return [200, {}];
 });
