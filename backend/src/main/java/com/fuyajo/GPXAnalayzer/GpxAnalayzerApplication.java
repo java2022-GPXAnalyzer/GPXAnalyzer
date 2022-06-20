@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
+import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
 import com.google.gson.Gson;
 import com.fuyajo.GPXAnalayzer.gpx.GpxCollector;
 
@@ -55,6 +56,30 @@ public class GpxAnalayzerApplication {
     try {
       GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
       return ResponseEntity.ok(gpx.getGpxInfo().toJson());
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping("/gpxApi/gpx/{gpxId}/trackPoints")
+  public ResponseEntity<?> getGpxTrackPoints(@PathVariable("gpxId") String gpxId) {
+    try {
+      GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
+      return ResponseEntity.ok(
+        GpxGsonBuilder.getNewBuilder().create().toJson(gpx.getTrackPoints())
+      );
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping("/gpxApi/gpx/{gpxId}/wayPoints")
+  public ResponseEntity<?> getGpxWayPoints(@PathVariable("gpxId") String gpxId) {
+    try {
+      GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
+      return ResponseEntity.ok(
+        GpxGsonBuilder.getNewBuilder().create().toJson(gpx.getWayPoints())
+      );
     } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
     }
