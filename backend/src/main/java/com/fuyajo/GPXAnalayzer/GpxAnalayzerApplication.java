@@ -32,11 +32,6 @@ public class GpxAnalayzerApplication {
 		return "GpxAnalayzer";
 	}
 
-	@GetMapping("/hello")
-	public String hello(@RequestParam(value="name", defaultValue="World") String name) {
-		return "Hello " + name;
-	}
-
   @GetMapping("/gpxApi/idList/")
   public String getIdList() {
     Gson gson = new Gson();
