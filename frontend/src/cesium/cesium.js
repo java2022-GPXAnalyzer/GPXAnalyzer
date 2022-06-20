@@ -191,9 +191,9 @@ export class GpxMap {
   }
 
   async initialize() {
-    this.loadGpxInfo();
-    this.loadWayPoints();
-    this.loadTrkPoints();
+    await this.loadGpxInfo();
+    await this.loadWayPoints();
+    await this.loadTrkPoints();
   }
 
   async loadGpxInfo() {
@@ -373,7 +373,7 @@ export class GpxMap {
     return true;
   }
 
-  toggleHover() {
+  hover() {
     if (!this.isSpeedDistribution && !this.isHover) {
       let color = CesiumUtility.getColor(this.index);
       let flag = 1;
@@ -396,7 +396,10 @@ export class GpxMap {
       });
       this.isHover = true;
     }
-    else if(!this.isSpeedDistribution && this.isHover) {
+  }
+
+  unhover(){
+    if(!this.isSpeedDistribution && this.isHover) {
       this.entity.path.material = CesiumUtility.getColor(this.index);
       this.isHover = false;
     }

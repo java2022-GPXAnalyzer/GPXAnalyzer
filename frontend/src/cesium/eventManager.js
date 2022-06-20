@@ -7,20 +7,23 @@ import { reactive } from 'vue';
 const ToolBar = {
   NORMAL: 0,
   ADDWAYPOINT: 1,
-}
+};
 
 const SelectType = {
   NONE: 0,
   MAP: 1,
-  POINT: 2
-}
+  POINT: 2,
+};
 
-export class eventManager{
+export class eventManager {
   state = reactive({
-    gpxMaps: [],
+    gpxLength: 0,
     showAlertMode: 0,
     showLoading: false,
-    loadingPercentMax: 0
+    loadingPercentMax: 0,
+    nowSelectMap: -1,
+    nowSelectPoint: null,
+    nowSelectType: 0,
   });
   
   isShowAlert = false;
@@ -29,163 +32,173 @@ export class eventManager{
   loadingMessage = '';
   gpxFilenames = [];
   gpxMaps = [];
-  nowSelectMap = -1;
   nowToolMode = 0;
-  nowSelectType = 0;
 
-  static getInstance(){
-    if(!eventManager.instance){
+  static getInstance() {
+    if (!eventManager.instance) {
       eventManager.instance = new eventManager();
     }
     return eventManager.instance;
   }
 
   // cesium event
-  setViewer(viewer){
+  setViewer(viewer) {
     this.viewer = viewer;
     return this;
   }
 
-  buildGpxMaps(){
-    getGpxListAPI().then((res) => {
-      this.showLoadingPercent(65, 'GPX analyzing...');
+  buildGpxMaps() {
+    getGpxListAPI().then(async (res) => {
+      this.showLoadingPercent(60, 'GPX analyzing...');
       res = res.data.result;
-      res.forEach((uuid, index) => {
+      let mapCount = res.length;
+      res.forEach(async (uuid, index) => {
         let gpxMap = new GpxMap(this.viewer, uuid, index);
-        gpxMap.initialize();
-        this.state.gpxMaps.push(gpxMap);
-      })
-      this.showLoadingPercent(100, 'GPX loading...');
+        await gpxMap.initialize();
+        this.gpxMaps.push(gpxMap);
+        this.state.gpxLength += 1;
+        this.showLoadingPercent(
+          60 + (index + 1) * (40 / mapCount),
+          'GPX loading...'
+        );
+      });
     });
     return this;
   }
 
-  initializeHandler(){
+  initializeHandler() {
     this.handler = new Handler(this.viewer);
     this.handler.initialize();
     return this;
   }
 
-  addWayPoint(pointData){
-    if(this.nowSelectMap === -1){
+  addWayPoint(pointData) {
+    if (this.state.nowSelectMap === -1) {
       // TODO
       return;
     }
-    this.state.gpxMaps[this.nowSelectMap].addPoint("wayPoints", pointData);
+    this.gpxMaps[this.state.nowSelectMap].addPoint('wayPoints', pointData);
     this.toggleWayPointRequest(-1);
   }
 
-  removePoint(mapIdx, pointId){
-    this.state.gpxMaps[mapIdx].removePoint(pointId);
+  removePoint(mapIdx, pointId) {
+    this.gpxMaps[mapIdx].removePoint(pointId);
   }
 
-  reDrawLine(id){
-    this.state.gpxMaps.forEach((gpxMap) => {
-      if(gpxMap.isHasPoint(id)){
+  reDrawLine(id) {
+    this.gpxMaps.forEach((gpxMap) => {
+      if (gpxMap.isHasPoint(id)) {
         gpxMap.reDrawLine();
       }
     });
   }
 
   // Handler event
-  callClick(pick, cartesian){
-    if(this.nowToolMode === ToolBar.NORMAL){
+  callClick(pick, cartesian) {
+    if (this.nowToolMode === ToolBar.NORMAL) {
       // TODO
-    }
-    else if(this.nowToolMode === ToolBar.ADDWAYPOINT){
+    } else if (this.nowToolMode === ToolBar.ADDWAYPOINT) {
       this.addWayPoint(cartesian);
     }
   }
 
   // Init vue
-  postGPXFile(filenames){
+  postGPXFile(filenames) {
     this.addGpxMaps(filenames);
   }
 
-  getGpxMaps(){
-    return this.state.gpxMaps;
+  getGpxMaps() {
+    return this.gpxMaps;
   }
 
-  setGpxMaps(gpxMaps){
-    this.state.gpxMaps = gpxMaps;
+  setGpxMaps(gpxMaps) {
+    this.gpxMaps = gpxMaps;
   }
 
   // index vue event
-  updateGpxInfo(gpxInfo){
-    this.state.gpxMaps[this.nowSelectMap].updateGpxInfo(gpxInfo);
+  updateGpxInfo(gpxInfo) {
+    this.gpxMaps[this.state.nowSelectMap].updateGpxInfo(gpxInfo);
   }
 
-  updateGpxPoint(id, gpxPoint){
+  updateGpxPoint(id, gpxPoint) {
     // TODO
-    this.state.gpxMaps.forEach((gpxMap) => {
-      if(gpxMap.isHasPoint(id)){
+    this.gpxMaps.forEach((gpxMap) => {
+      if (gpxMap.isHasPoint(id)) {
         gpxMap.updatePoint(id, gpxPoint);
       }
     });
   }
 
-  addGpxMaps(filenames){
-    filenames = filenames.filter((filename) =>{
+  addGpxMaps(filenames) {
+    filenames = filenames.filter((filename) => {
       return this.gpxFilenames.indexOf(filename) === -1;
-    })
+    });
     filenames.forEach((filename) => {
       this.gpxFilenames.push(filename);
     });
     postGpxFilePathAPI(filenames);
   }
 
-  saveGpxMaps(){
+  saveGpxMaps() {
     let postDatas = [];
-    this.state.gpxMaps.forEach((gpxMap) => {
+    this.gpxMaps.forEach((gpxMap) => {
       postDatas.push(gpxMap.toJson());
     });
     putGpxAPI(postDatas);
   }
 
-  selectMap(index){
-    if(index >= -1 && index <= this.state.gpxMaps.length){
-      this.nowSelectMap = index;
-      this.nowSelectType = SelectType.MAP;
+  selectMap(index, toggle = true) {
+    if (this.state.nowSelectMap !== -1 && this.state.nowSelectMap !== index ) {
+      this.unhover(this.state.nowSelectMap);
+    }
+    if (index >= -1 && index <= this.gpxMaps.length) {
+      if (this.state.nowSelectMap !== index || !toggle) {
+        this.state.nowSelectMap = index;
+        this.state.nowSelectType = SelectType.MAP;
+        this.hover(index);
+      } else {
+        this.state.nowSelectMap = -1;
+        this.state.nowSelectType = SelectType.NONE;
+      }
     }
   }
 
-  selectPoint(mapIdx, pointId){
-    this.nowSelectType = SelectType.POINT;
-    this.nowSelectMap = mapIdx;
-    this.nowSelectPoint = pointId;
+  selectPoint(index, pointId) {
+    this.state.nowSelectType = SelectType.POINT;
+    this.state.nowSelectPoint = pointId;
   }
 
-  getInfo(){
-    if(this.nowSelectType === SelectType.MAP){
+  getInfo() {
+    if (this.state.nowSelectType === SelectType.MAP) {
       return {
         type: SelectType.MAP,
-        result: this.state.gpxMaps[this.nowSelectMap]
+        result: this.gpxMaps[this.state.nowSelectMap],
       };
-    }
-    else if(this.nowSelectType === SelectType.POINT){
+    } else if (this.state.nowSelectType === SelectType.POINT) {
       return {
         type: SelectType.POINT,
-        result: this.state.gpxMaps[this.nowSelectMap].getPoint(this.nowSelectPoint)
+        result: this.gpxMaps[this.state.nowSelectMap].getPoint(
+          this.state.nowSelectPoint
+        ),
       };
     }
-    return{
+    return {
       type: SelectType.NONE,
-      result: null
-    }
+      result: null,
+    };
   }
 
-  changeMode(mode){
-    if(mode >= 0 && mode <= 1){
+  changeMode(mode) {
+    if (mode >= 0 && mode <= 1) {
       this.nowToolMode = mode;
     }
   }
 
-  toggleWayPointRequest(mapIdx){
-    if(this.nowToolMode !== ToolBar.ADDWAYPOINT){
+  toggleWayPointRequest(mapIdx) {
+    if (this.nowToolMode !== ToolBar.ADDWAYPOINT) {
       this.changeMode(ToolBar.ADDWAYPOINT);
       this.selectMap(mapIdx);
-    }
-    else{
+    } else {
       this.changeMode(ToolBar.NORMAL);
       this.selectMap(-1);
     }
@@ -193,67 +206,84 @@ export class eventManager{
 
   // Toolbar event
 
-  setTracking(mapIdx){
-    this.state.gpxMaps[mapIdx].activeTime();
+  setTracking(mapIdx) {
+    this.gpxMaps[mapIdx].activeTime();
   }
 
-  beginTracking(){
+  beginTracking() {
     this.viewer.clock.shouldAnimate = true;
   }
 
-  stopTracking(){
+  stopTracking() {
     this.viewer.clock.shouldAnimate = false;
   }
 
-  setTrakingSpeed(speed){
+  setTrakingSpeed(speed) {
+    console.log(speed);
     this.viewer.clock.multiplier = speed;
   }
 
-  fullScreen(){
+  fullScreen() {
     Cesium.Fullscreen.requestFullscreen(this.viewer.scene.canvas);
   }
 
-  backToHomeView(){
+  backToHomeView() {
     this.viewer.trackedEntity = null;
     this.viewer.camera.setView({
       destination: Cesium.Cartesian3.fromDegrees(121.0, 23.5, 550000.0),
     });
   }
 
-  toggleMapDisplay(mapIdx){
-    this.state.gpxMaps[mapIdx].toggleDisplay();
+  zoomIn(){
+    this.viewer.camera.zoomIn();
   }
 
-  toggleSpeedDistribution(mapIdx){
-    let res = this.state.gpxMaps[mapIdx].toggleSpeedDistribution();
-    if(!res){
+  zoomOut(){
+    this.viewer.camera.zoomOut();
+  }
+
+  toggleMapDisplay(mapIdx) {
+    this.gpxMaps[mapIdx].toggleDisplay();
+  }
+
+  toggleSpeedDistribution() {
+    if (this.state.nowSelectMap === -1) {
+      this.showAlertMessage(2, 'Please select a map.');
+      return;
+    }
+    let res = this.gpxMaps[this.state.nowSelectMap].toggleSpeedDistribution();
+    if (!res) {
       this.showAlertMessage(2, 'Please save the map first.');
     }
   }
 
-  toggleHover(mapIdx){
-    this.state.gpxMaps[mapIdx].toggleHover();
+  hover(mapIdx) {
+    this.gpxMaps[mapIdx].hover();
+  }
+
+  unhover(mapIdx) {
+    this.gpxMaps[mapIdx].unhover();
   }
 
   // alert event
-  showAlertMessage(showAlertMode, message){
+  showAlertMessage(showAlertMode, message) {
     this.state.showAlertMode = showAlertMode;
     this.alertMessage = message;
   }
 
   // Loading Component
-  showLoading(){
+  showLoading() {
     this.state.showLoading = true;
   }
 
-  showLoadingPercent(percent, message){
+  showLoadingPercent(percent, message) {
     console.log(percent, message);
     this.state.showLoading = true;
     this.state.loadingPercentMax = percent;
     this.loadingMessage = message;
   }
 
-  hideLoading(){
+  hideLoading() {
     this.state.showLoading = false;
   }
 }

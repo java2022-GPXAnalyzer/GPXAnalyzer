@@ -87,7 +87,6 @@
         class="ml-1 w-10 flex text-center border-2 border-gray-500"
         type="text"
         v-model.number="state.velocity"
-        v-on:keyup.enter="enterVelocity(velocity)"
       />
     </span>
     <button @click="addVelocity" class="mr-2 my-auto py-0">
@@ -199,7 +198,10 @@
   </div>
 </template>
 <script setup>
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
+import { eventManager } from '@/cesium/eventManager';
+
+const emi = eventManager.getInstance();
 
 const state = reactive({
   velocity: 1,
@@ -208,54 +210,51 @@ const state = reactive({
   reset: false,
 });
 
-function track() {
-  // Track
-  viewer.trackedEntity = undefined;
-  // addGPXPoint(0, {
-  //   lng: '123.978',
-  //   lat: '24.566',
-  //   alt: '5550',
-  // });
-  // let tmp = mapsData[0];
-  // tmp.polyline.material = Cesium.Color.RED;
-}
+watch(()=>state.velocity, (val)=>{
+  console.log(val)
+  emi.setTrakingSpeed(val);
+})
 
 function start() {
-  viewer.clock.shouldAnimate = true;
+  // viewer.clock.shouldAnimate = true;
+  emi.beginTracking();
   state.start = true;
 }
 
 function pause() {
-  viewer.clock.shouldAnimate = false;
+  // viewer.clock.shouldAnimate = false;
+  emi.stopTracking();
   state.start = false;
 }
 
 function reduceVelocity() {
-  if (state.velocity) state.velocity -= 1;
-  else state.velocity = 5;
-}
-
-function enterVelocity(velocity) {
-  if (velocity) {
-    state.velocity = velocity;
-  }
+  state.velocity -= 1;
+  if(state.velocity == 0) state.velocity = -1;
 }
 
 function addVelocity() {
-  if (state.velocity) state.velocity += 1;
-  else state.velocity = 5;
+  state.velocity = parseInt(state.velocity) + 1;
+  if(state.velocity == 0) state.velocity = 1;
 }
 
-function movementRateDistributionMap() {}
+function movementRateDistributionMap() {
+  emi.toggleSpeedDistribution();
+}
 
-function reset() {}
+function large(){
+  emi.fullScreen();
+}
+
+function reset() {
+  emi.backToHomeView();
+}
 
 function zoomIn() {
-  viewer.camera.zoomIn();
+  emi.zoomIn();
 }
 
 function zoomOut() {
-  viewer.camera.zoomOut();
+  emi.zoomOut();
 }
 </script>
 <style></style>
