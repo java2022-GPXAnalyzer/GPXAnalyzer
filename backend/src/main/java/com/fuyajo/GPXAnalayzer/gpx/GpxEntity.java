@@ -133,7 +133,6 @@ public class GpxEntity extends AbstractEntity {
 
   public String toJson() {
     GsonBuilder gpxGsonBuilder = GpxGsonBuilder.getNewBuilder();
-    gpxGsonBuilder.setPrettyPrinting();
     return gpxGsonBuilder.create().toJson(this);
   }
 

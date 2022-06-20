@@ -1,6 +1,8 @@
 package com.fuyajo.GPXAnalayzer;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
@@ -40,11 +42,22 @@ public class GpxAnalayzerApplication {
 
   @GetMapping("/gpxApi/gpx/{gpxId}")
   public ResponseEntity<?> getGpxJson(@PathVariable("gpxId") String gpxId) {
-    GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
-    if (gpx == null) {
+    try {
+      GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
+      return ResponseEntity.ok(gpx.toJson());
+    } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
     }
-    return ResponseEntity.ok(gpx.toJson());
+  }
+
+  @GetMapping("/gpxApi/gpx/{gpxId}/gpxInfo")
+  public ResponseEntity<?> getGpxInfo(@PathVariable("gpxId") String gpxId) {
+    try {
+      GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
+      return ResponseEntity.ok(gpx.getGpxInfo().toJson());
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @PostMapping("gpxApi/uploadGpx")

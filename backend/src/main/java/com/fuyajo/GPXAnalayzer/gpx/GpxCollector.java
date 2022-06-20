@@ -2,6 +2,7 @@ package com.fuyajo.GPXAnalayzer.gpx;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.ArrayList;
 
 public class GpxCollector {
@@ -20,13 +21,13 @@ public class GpxCollector {
     gpxEntities.add(gpx);
   }
 
-  public GpxEntity getGpxEntity(String uuid) {
+  public GpxEntity getGpxEntity(String uuid) throws NoSuchElementException {
     for (GpxEntity gpx : gpxEntities) {
       if (gpx.getUuid().toString().equals(uuid)) {
         return gpx;
       }
     }
-    return null;
+    throw new NoSuchElementException("Gpx Entity Not Found");
   }
 
   public List<String> getUuids() {

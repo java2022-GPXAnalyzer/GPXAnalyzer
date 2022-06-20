@@ -1,5 +1,6 @@
 package com.fuyajo.GPXAnalayzer.gpx;
 
+import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
 import com.google.gson.annotations.Expose;
 
 public class GpxInfo {
@@ -48,6 +49,10 @@ public class GpxInfo {
 
   public String getName() {
     return name;
+  }
+
+  public String toJson() {
+    return GpxGsonBuilder.getNewBuilder().create().toJson(this);
   }
 
   @Override
