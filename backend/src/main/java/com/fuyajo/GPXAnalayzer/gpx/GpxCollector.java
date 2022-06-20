@@ -13,7 +13,7 @@ public class GpxCollector {
   public void addByFilepath(String filepath) throws IOException {
     for (GpxEntity gpx : gpxEntities) {
       if (gpx.getFilepath().equals(filepath)) {
-        throw new IOException("Gpx File Path Already Exists");
+        throw new IOException("Gpx File Path Already Exists, uuid: " + gpx.getUuid());
       }
     }
     GpxEntity gpx = new GpxEntity(filepath);

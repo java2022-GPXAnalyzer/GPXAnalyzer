@@ -28,23 +28,23 @@ public class GpxAnalayzerApplication {
 	}
 
 	@GetMapping("/")
-	public String index() {
-		return "GpxAnalayzer";
+	public ResponseEntity<?> index() {
+		return ResponseEntity.ok("GpxAnalayzer");
 	}
 
   @GetMapping("/gpxApi/idList/")
-  public String getIdList() {
+  public ResponseEntity<?> getIdList() {
     Gson gson = new Gson();
-    return gson.toJson(gpxCollector.getUuids());
+    return ResponseEntity.ok(gson.toJson(gpxCollector.getUuids()));
   }
 
   @GetMapping("/gpxApi/gpx/{gpxId}")
-  public String getGpxJson(@PathVariable("gpxId") String gpxId) {
+  public ResponseEntity<?> getGpxJson(@PathVariable("gpxId") String gpxId) {
     GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
     if (gpx == null) {
-      return "";
+      return ResponseEntity.notFound().build();
     }
-    return gpx.toJson();
+    return ResponseEntity.ok(gpx.toJson());
   }
 
   @PostMapping("gpxApi/uploadGpx")
