@@ -13,8 +13,6 @@ public class WayPointEntity extends AbstractEntity {
   private static final Logger LOGGER = LoggerFactory.getLogger(WayPointEntity.class);
 
   private final WayPoint wayPoint;
-  @Expose
-  private final String test = "test";
 
   public WayPointEntity(WayPoint wayPoint) {
     this.wayPoint = wayPoint;
