@@ -41,7 +41,7 @@ public class GpxAnalayzerApplication {
   }
 
   @GetMapping("/gpxApi/gpx/{gpxId}")
-  public ResponseEntity<?> getGpxJson(@PathVariable("gpxId") String gpxId) {
+  public ResponseEntity<?> getGpx(@PathVariable("gpxId") String gpxId) {
     try {
       GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
       return ResponseEntity.ok(gpx.toJson());
