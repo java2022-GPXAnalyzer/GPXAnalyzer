@@ -10,10 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
 import com.fuyajo.GPXAnalayzer.gpx.WayPointEntity;
-import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
-import com.google.gson.Gson;
-
-import io.jenetics.jpx.WayPoint;
 
 @SpringBootTest
 public class TrackSmootherTest {
@@ -21,7 +17,7 @@ public class TrackSmootherTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(TrackSmootherTest.class);
 
   @Test
-  void testProcess() {
+  void testSmoothTrack() {
     try {
       GpxEntity gpxEntity = new GpxEntity("../GPXData/test.gpx");
       List<WayPointEntity> trackPoints = gpxEntity.getTrackPoints();
@@ -32,6 +28,26 @@ public class TrackSmootherTest {
       GpxEntity oriGpxEntity = new GpxEntity(gpxEntity);
       gpxEntity.setTrackPoints(trackPoints);
       gpxEntity.saveGpsFile("../GPXData/test_kalman.gpx");
+      LOGGER.info(gpxEntity.getTrackPoints().get(5).getLatitude() + " " + oriGpxEntity.getTrackPoints().get(5).getLatitude());
+      Assertions.assertNotEquals(gpxEntity.getTrackPoints().get(5).getLatitude(), oriGpxEntity.getTrackPoints().get(5).getLatitude());
+    } catch (Exception e) {
+      Assertions.fail(e.getMessage());
+    }
+  }
+
+  @Test
+  void testSmoothAndIsometric() {
+    try {
+      GpxEntity gpxEntity = new GpxEntity("../GPXData/test.gpx");
+      List<WayPointEntity> trackPoints = gpxEntity.getTrackPoints();
+
+      TrackSmoother trackSmoother = new TrackSmoother();
+      trackPoints = trackSmoother.smoothTrack(trackPoints);
+      trackPoints = trackSmoother.generateIsometricTrack(trackPoints, 5);
+
+      GpxEntity oriGpxEntity = new GpxEntity(gpxEntity);
+      gpxEntity.setTrackPoints(trackPoints);
+      gpxEntity.saveGpsFile("../GPXData/test_isometric.gpx");
       LOGGER.info(gpxEntity.getTrackPoints().get(5).getLatitude() + " " + oriGpxEntity.getTrackPoints().get(5).getLatitude());
       Assertions.assertNotEquals(gpxEntity.getTrackPoints().get(5).getLatitude(), oriGpxEntity.getTrackPoints().get(5).getLatitude());
     } catch (Exception e) {

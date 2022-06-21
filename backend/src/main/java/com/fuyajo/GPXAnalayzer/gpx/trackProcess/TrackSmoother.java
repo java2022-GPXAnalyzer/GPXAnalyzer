@@ -1,5 +1,7 @@
 package com.fuyajo.GPXAnalayzer.gpx.trackProcess;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +49,44 @@ public class TrackSmoother {
     }
 
     return trackPoints;
+  }
+
+  public List<WayPointEntity> generateIsometricTrack(
+      List<WayPointEntity> oriTrackPoints,
+      double PointDistInMeter) {
+    List<WayPointEntity> trackPoints = new ArrayList<WayPointEntity>();
+    oriTrackPoints.forEach(trackPoint -> trackPoints.add(new WayPointEntity(trackPoint)));
+
+    List<WayPointEntity> newTrackPoints = new ArrayList<WayPointEntity>();
+    double cumulateDist = 0;
+    for(int i = 0; i < trackPoints.size() - 1; i++) {
+      WayPointEntity wpe1, wpe2;
+      wpe1 = trackPoints.get(i);
+      wpe2 = trackPoints.get(i + 1);
+      double pointDist = WayPointEntity.getDistanceWithMeter(wpe1, wpe2);
+      cumulateDist += pointDist;
+      if(cumulateDist >= PointDistInMeter) {
+        for(double currentDist = cumulateDist % PointDistInMeter;
+            currentDist <= cumulateDist;
+            currentDist += PointDistInMeter) {
+          double ratio = PointDistInMeter / cumulateDist;
+          double newLat = wpe1.getLatitude() + (wpe2.getLatitude() - wpe1.getLatitude()) * ratio;
+          double newLon = wpe1.getLongitude() + (wpe2.getLongitude() - wpe1.getLongitude()) * ratio;
+          Duration duration = Duration.between(wpe1.getTime(), wpe2.getTime());
+          duration = Duration.ofMillis((long)(duration.toMillis() * ratio));
+          Instant newTime = wpe1.getTime().plus(duration);
+
+          WayPoint newWayPoint = wpe1.getWayPoint().toBuilder()
+            .lat(newLat)
+            .lon(newLon)
+            .time(newTime)
+            .build();
+          newTrackPoints.add(new WayPointEntity(newWayPoint));
+        }
+        cumulateDist %= PointDistInMeter;
+      }
+    }
+    return newTrackPoints;
   }
 
   private class KalmanLatLong {
