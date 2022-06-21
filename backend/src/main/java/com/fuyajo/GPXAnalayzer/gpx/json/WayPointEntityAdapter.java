@@ -14,12 +14,10 @@ import io.jenetics.jpx.WayPoint;
 public class WayPointEntityAdapter extends TypeAdapter<WayPointEntity>{
   @Override
   public void write(final JsonWriter out, final WayPointEntity wayPointEntity) throws IOException {
-    WayPoint wayPoint = wayPointEntity.getWayPoint();
-
     out.beginObject();
     out.name("uuid").value(wayPointEntity.getUuid().toString());
-    out.name("lat").value(wayPoint.getLatitude());
-    out.name("lon").value(wayPoint.getLongitude());
+    out.name("lat").value(wayPointEntity.getLatitude());
+    out.name("lon").value(wayPointEntity.getLongitude());
     out.name("ele").value(wayPointEntity.getElevation());
     out.name("time").value(wayPointEntity.getTime().toString());
     out.name("name").value(wayPointEntity.getName());

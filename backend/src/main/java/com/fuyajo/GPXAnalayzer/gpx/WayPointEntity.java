@@ -27,6 +27,14 @@ public class WayPointEntity extends AbstractEntity {
     return wayPoint;
   }
 
+  public Double getLatitude() {
+    return wayPoint.getLatitude().doubleValue();
+  }
+
+  public Double getLongitude() {
+    return wayPoint.getLongitude().doubleValue();
+  }
+
   public Instant getTime() {
     Instant time = Instant.ofEpochMilli(0);
     try {
