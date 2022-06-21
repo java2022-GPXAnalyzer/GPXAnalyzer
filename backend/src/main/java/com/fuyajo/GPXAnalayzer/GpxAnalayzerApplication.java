@@ -1,7 +1,11 @@
 package com.fuyajo.GPXAnalayzer;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,6 +18,7 @@ import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import com.fuyajo.GPXAnalayzer.gpx.GpxCollector;
 
 import org.slf4j.Logger;
@@ -88,10 +93,17 @@ public class GpxAnalayzerApplication {
   }
 
   @PostMapping("/gpxApi/uploadGpx")
-  public ResponseEntity<?> uploadGpx(@RequestBody String gpxFilePath) {
+  public ResponseEntity<?> uploadGpxList(@RequestBody String gpxFilePathsJson) {
     try {
-      gpxCollector.addByFilepath(gpxFilePath);
-      return ResponseEntity.ok("OK, " + "uploaded gpx file uuid: " + gpxCollector.getLast().getUuid());
+      Gson gson = new Gson();
+      Type stringListType = TypeToken.getParameterized(List.class, String.class).getType();
+      List<String> gpxFilePaths = gson.fromJson(gpxFilePathsJson, stringListType);
+      List<UUID> uuids = new ArrayList<UUID>();
+      for (String gpxFilePath : gpxFilePaths) {
+        gpxCollector.addByFilepath(gpxFilePath);
+        uuids.add(gpxCollector.getLast().getUuid());
+      }
+      return ResponseEntity.ok("OK, " + "uploaded gpx file uuids: " + gson.toJson(uuids));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (IOException e) {
@@ -114,11 +126,11 @@ public class GpxAnalayzerApplication {
   }
 
   @PutMapping("/gpxApi/updateGpx")
-  public ResponseEntity<?> updateAllGpx(@RequestBody String allGpxJson) {
+  public ResponseEntity<?> updateGpxList(@RequestBody String GpxListJson) {
     try {
       Gson gson = GpxGsonBuilder.getNewBuilder().create();
-      JsonArray allGpxJsonObject = gson.fromJson(allGpxJson, JsonArray.class);
-      for (JsonElement gpxJson : allGpxJsonObject) {
+      JsonArray GpxJsonListObject = gson.fromJson(GpxListJson, JsonArray.class);
+      for (JsonElement gpxJson : GpxJsonListObject) {
         GpxEntity gpx = GpxEntity.fromJson(gpxJson.toString());
         gpxCollector.update(gpx);
       }
