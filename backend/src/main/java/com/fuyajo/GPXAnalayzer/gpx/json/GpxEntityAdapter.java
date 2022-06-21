@@ -30,6 +30,7 @@ public class GpxEntityAdapter extends TypeAdapter<GpxEntity>{
     out.name("wayPoints").jsonValue(gpxGson.toJson(gpxEntity.getWayPoints()));
     out.name("routePoints").jsonValue(gpxGson.toJson(gpxEntity.getRoutePoints()));
     out.name("trackPoints").jsonValue(gpxGson.toJson(gpxEntity.getTrackPoints()));
+    out.name("filepath").value(gpxEntity.getFilepath());
     out.endObject();
   }
   
@@ -40,6 +41,7 @@ public class GpxEntityAdapter extends TypeAdapter<GpxEntity>{
     Version version = Version.of("1.1");
     String creator = "";
     String name = "";
+    String filepath = null;
     List<WayPointEntity> wayPoints = new ArrayList<>();
     List<WayPointEntity> routePoints = new ArrayList<>();
     List<WayPointEntity> trackPoints = new ArrayList<>();
@@ -71,6 +73,8 @@ public class GpxEntityAdapter extends TypeAdapter<GpxEntity>{
           trackPoints.add(gpxGson.fromJson(in, WayPointEntity.class));
         }
         in.endArray();
+      } else if (nextName.equals("filepath")) {
+        filepath = in.nextString();
       } else {
         in.skipValue();
       }
@@ -102,7 +106,7 @@ public class GpxEntityAdapter extends TypeAdapter<GpxEntity>{
 
     // to gpx entity
     GPX gpx = gpxBuilder.build();
-    GpxEntity gpxEntity = new GpxEntity(gpx, uuid);
+    GpxEntity gpxEntity = new GpxEntity(gpx, filepath, uuid);
 
     return gpxEntity;
   }

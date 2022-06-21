@@ -12,7 +12,7 @@ public class WayPointEntity extends AbstractEntity {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WayPointEntity.class);
 
-  private final WayPoint wayPoint;
+  private WayPoint wayPoint;
 
   public WayPointEntity(WayPoint wayPoint) {
     this.wayPoint = wayPoint;
@@ -23,8 +23,26 @@ public class WayPointEntity extends AbstractEntity {
     this.wayPoint = wayPoint;
   }
 
+  public static Double getDistanceWithMeter(WayPointEntity wayPointEntity1, WayPointEntity wayPointEntity2) {
+    Double lat1 = wayPointEntity1.getWayPoint().getLatitude().doubleValue();
+    Double lat2 = wayPointEntity2.getWayPoint().getLatitude().doubleValue();
+    Double lon1 = wayPointEntity1.getWayPoint().getLongitude().doubleValue();
+    Double lon2 = wayPointEntity2.getWayPoint().getLongitude().doubleValue();
+
+    // TODO: increse distance accuracy in WGS84
+    return Math.sqrt(Math.pow((lat1 - lat2) * 100000, 2) + Math.pow((lon1 - lon2) * 100000, 2));
+  }
+
+  public static long getMillisecondDifferent(WayPointEntity wayPointEntity1, WayPointEntity wayPointEntity2) {
+    return Math.abs(wayPointEntity1.getTime().toEpochMilli() - wayPointEntity2.getTime().toEpochMilli());
+  }
+
   public WayPoint getWayPoint() {
-    return wayPoint;
+    return wayPoint.toBuilder().build();
+  }
+
+  public void setWayPoint(WayPoint wayPoint) {
+    this.wayPoint = wayPoint;
   }
 
   public Double getLatitude() {
@@ -51,7 +69,7 @@ public class WayPointEntity extends AbstractEntity {
 
   public double getElevation() {
     try {
-      return wayPoint.getElevation().orElse(null).doubleValue();
+      return getWayPoint().getElevation().orElse(null).doubleValue();
     } catch (Exception e) {
       LOGGER.error("getElevation() error: " + e);
       return 0.0f;

@@ -21,8 +21,10 @@ public class ObjectPool {
     entityMap.remove(entity.getUuid().toString());
   }
 
+  // TODO: change return to deep copy
   public Object get(String uuid) {
     return entityMap.get(uuid);
+     
   }
 
 }

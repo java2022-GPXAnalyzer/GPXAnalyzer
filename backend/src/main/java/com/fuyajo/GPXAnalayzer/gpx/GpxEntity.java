@@ -39,7 +39,7 @@ public class GpxEntity extends AbstractEntity {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GpxEntity.class);
   private final String filepath;
-  private final GPX gpx;
+  private GPX gpx;
 
   private GpxInfo gpxInfo;
   private List<WayPointEntity> wayPoints = new ArrayList<>();
@@ -49,7 +49,7 @@ public class GpxEntity extends AbstractEntity {
   public GpxEntity(String filepath) throws IOException {
     this(GpxFileHandler.DEFAULT.read(filepath), filepath, null);
   }
-  
+
   public GpxEntity(GPX gpx) throws IOException {
     this(gpx, null, null);
   }
@@ -58,10 +58,20 @@ public class GpxEntity extends AbstractEntity {
     this(gpx, null, uuid);
   }
 
-  private GpxEntity(GPX gpx, String filepath, UUID uuid) throws IOException{
+  public GpxEntity(GpxEntity gpxEntity) {
+    super(gpxEntity.getUuid());
+    this.filepath = gpxEntity.getFilepath();
+    this.gpx = gpxEntity.getGpx();
+    this.gpxInfo = gpxEntity.getGpxInfo();
+    this.wayPoints = gpxEntity.getWayPoints();
+    this.routePoints = gpxEntity.getRoutePoints();
+    this.trackPoints = gpxEntity.getTrackPoints();
+  }
+
+  public GpxEntity(GPX gpx, String filepath, UUID uuid) throws IOException{
     super(uuid);
     this.filepath = filepath;
-    this.gpx = gpx;
+    this.gpx = gpx.toBuilder().build();
     gpxInfo = new GpxInfo(this);
     gpx.getWayPoints().forEach(wayPoint -> {
       wayPoints.add(new WayPointEntity(wayPoint));
@@ -85,23 +95,43 @@ public class GpxEntity extends AbstractEntity {
   }
 
   public GPX getGpx() {
-    return gpx;
+    return gpx.toBuilder().build();
+  }
+
+  public void setGpx(GPX gpx) {
+    this.gpx = gpx;
   }
 
   public GpxInfo getGpxInfo() {
-    return gpxInfo;
+    return new GpxInfo(gpxInfo);
+  }
+
+  public void setGpxInfo(GpxInfo gpxInfo) {
+    this.gpxInfo = gpxInfo;
   }
 
   public List<WayPointEntity> getWayPoints() {
-    return wayPoints;
+    return new ArrayList<>(wayPoints);
+  }
+
+  public void setWayPoints(List<WayPointEntity> wayPoints) {
+    this.wayPoints = new ArrayList<>(wayPoints);
   }
 
   public List<WayPointEntity> getRoutePoints() {
-    return routePoints;
+    return new ArrayList<>(routePoints);
+  }
+
+  public void setRoutePoints(List<WayPointEntity> routePoints) {
+    this.routePoints = new ArrayList<>(routePoints);
   }
 
   public List<WayPointEntity> getTrackPoints() {
-    return trackPoints;
+    return new ArrayList<>(trackPoints);
+  }
+
+  public void setTrackPoints(List<WayPointEntity> trackPoints) {
+    this.trackPoints = new ArrayList<>(trackPoints);
   }
 
   public String getStartTime() {
@@ -135,6 +165,15 @@ public class GpxEntity extends AbstractEntity {
 
   public void updateGpx() {
     // TODO: update gpx
+  }
+
+  public void saveGpxFile() throws IOException {
+    this.saveGpsFile(this.filepath);
+  }
+
+  public void saveGpsFile(String filepath) throws IOException {
+    GpxFileHandler gpxFileHandler = new GpxFileHandler(this.gpx);
+    gpxFileHandler.write(filepath);
   }
 
   public String toJson() {

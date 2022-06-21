@@ -10,8 +10,6 @@ public class GpxCollector {
 
   private List<GpxEntity> gpxEntities = new ArrayList<>();
   
-  public GpxCollector() {}
-
   public void addByFilepath(String filepath) throws IOException, IllegalArgumentException {
     for (GpxEntity gpx : gpxEntities) {
       if (gpx.getFilepath().equals(filepath)) {
@@ -22,15 +20,17 @@ public class GpxCollector {
     gpxEntities.add(gpx);
   }
 
-  public void update(GpxEntity gpx) throws IOException, IllegalArgumentException {
-    this.update(gpx, gpx.getUuid());
+  public void update(GpxEntity newGpxEntity) throws IOException, IllegalArgumentException {
+    this.update(newGpxEntity, newGpxEntity.getUuid());
   }
 
-  public void update(GpxEntity gpx, UUID uuid) throws IOException, IllegalArgumentException {
+  // TODO: don't remove gpx, update them instead
+  public void update(GpxEntity newGpxEntity, UUID uuid) throws IOException, IllegalArgumentException {
     for (GpxEntity gpxEntity : gpxEntities) {
       if (gpxEntity.getUuid().equals(uuid)) {
         gpxEntities.remove(gpxEntity);
-        gpxEntities.add(gpx);
+        gpxEntities.add(newGpxEntity);
+        newGpxEntity.saveGpxFile();
         return;
       }
     }
@@ -38,23 +38,23 @@ public class GpxCollector {
   }
 
   public GpxEntity getGpxEntity(String uuid) throws NoSuchElementException {
-    for (GpxEntity gpx : gpxEntities) {
-      if (gpx.getUuid().toString().equals(uuid)) {
-        return gpx;
+    for (GpxEntity gpxEntity : gpxEntities) {
+      if (gpxEntity.getUuid().toString().equals(uuid)) {
+        return new GpxEntity(gpxEntity);
       }
     }
     throw new NoSuchElementException("Gpx Entity Not Found");
   }
 
-  public List<String> getUuids() {
-    List<String> uuids = new ArrayList<>();
+  public List<UUID> getUuids() {
+    List<UUID> uuids = new ArrayList<>();
     for (GpxEntity gpx : gpxEntities) {
-      uuids.add(gpx.getUuid().toString());
+      uuids.add(gpx.getUuid());
     }
     return uuids;
   }
 
   public GpxEntity getLast() {
-    return gpxEntities.get(gpxEntities.size() - 1);
+    return new GpxEntity(gpxEntities.get(gpxEntities.size() - 1));
   }
 }

@@ -22,6 +22,10 @@ public class GpxFileHandler {
     .build();
   }
 
+  public GpxFileHandler(GPX gpx) {
+    this.gpx = gpx;
+  }
+
   public void write(String filepath) throws IOException{
     LOGGER.info("Writing gpx to file: " + filepath);
     GPX.write(gpx, Path.of(filepath));

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -45,7 +46,10 @@ public class GpxAnalayzerApplication {
   @GetMapping("/gpxApi/idList/")
   public ResponseEntity<?> getIdList() {
     Gson gson = new Gson();
-    return ResponseEntity.ok(gson.toJson(gpxCollector.getUuids()));
+    List<String> idList = gpxCollector.getUuids().stream()
+      .map(uuid -> uuid.toString())
+      .collect(Collectors.toList()); 
+    return ResponseEntity.ok(gson.toJson(idList));
   }
 
   @GetMapping("/gpxApi/gpx/{gpxId}")
