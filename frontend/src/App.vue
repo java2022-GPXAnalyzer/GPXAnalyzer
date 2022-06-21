@@ -1,9 +1,5 @@
-<script setup>
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-</script>
-
 <template>
+<<<<<<< HEAD
   <div class="h-screen w-screen flex">
     <div class="container my-auto mx-auto inline-block w-128">
       <!-- <img class="h-64 w-64" alt="Vue logo" src="./assets/map.png" /> -->
@@ -33,6 +29,16 @@ export default {
     },
   },
 }
+=======
+  <loading></loading>
+  <alert></alert>
+  <router-view></router-view>
+</template>
+
+<script setup>
+import alert from '@/components/alert.vue';
+import loading from '@/components/loading.vue';
+>>>>>>> jimmy_dev
 </script>
 
 <style>
