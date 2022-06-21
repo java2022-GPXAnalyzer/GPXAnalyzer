@@ -3,6 +3,8 @@ import { GpxMap } from '@/cesium/cesium';
 import { Handler } from '@/cesium/handler';
 import * as Cesium from 'cesium';
 import { reactive } from 'vue';
+// const { ipcRenderer } = window.require('electron');
+// import { ipcRenderer } from 'electron';
 
 const ToolBar = {
   NORMAL: 0,
@@ -41,8 +43,27 @@ export class eventManager {
   static getInstance() {
     if (!eventManager.instance) {
       eventManager.instance = new eventManager();
+      eventManager.instance.initKeyboardEvent();
     }
     return eventManager.instance;
+  }
+
+  // keyboard event
+
+  initKeyboardEvent() {
+    window.onkeydown = (e) => {
+      let ev = window.event || e;
+      let code = ev.keyCode || ev.which;
+      if (code == 82 && (ev.metaKey || ev.ctrlKey)) {
+        return false;
+      }
+      if (code == 83 && (ev.metaKey || ev.ctrlKey)) {
+        return this.saveGpxMaps();
+      }
+      if (code == 82 && code == 16 && (ev.metaKey || ev.ctrlKey)) {
+        return false;
+      }
+    };
   }
 
   // cesium event
@@ -98,7 +119,7 @@ export class eventManager {
     });
     return this;
   }
-
+  
   initializeHandler() {
     this.handler = new Handler(this.viewer);
     this.handler.initialize();
@@ -185,7 +206,13 @@ export class eventManager {
 
   // Init vue
   postGPXFile(filenames) {
-    this.addGpxMaps(filenames);
+    filenames = filenames.filter((filename) => {
+      return this.gpxFilenames.indexOf(filename) === -1;
+    });
+    filenames.forEach((filename) => {
+      this.gpxFilenames.push(filename);
+    });
+    return postGpxFilePathAPI(filenames);
   }
 
   getGpxMaps() {
@@ -211,21 +238,38 @@ export class eventManager {
   }
 
   addGpxMaps(filenames) {
-    filenames = filenames.filter((filename) => {
-      return this.gpxFilenames.indexOf(filename) === -1;
+    this.postGPXFile(filenames).then((res) => {
+      res = res.data.result;
+      // console.log(res.data);
+      res.forEach(async (uuid) => {
+        let gpxMap = new GpxMap(this.viewer, uuid, this.gpxMaps.length);
+        await gpxMap.initialize();
+        this.gpxMaps.push(gpxMap);
+        this.state.gpxLength += 1;
+        this._timeUpdateAllTime();
+        this.activeTime();
+      });
+    }).catch(e => {
+      this.showAlertMessage(2, 'GPX file upload failed.');
     });
-    filenames.forEach((filename) => {
-      this.gpxFilenames.push(filename);
-    });
-    postGpxFilePathAPI(filenames);
   }
 
   saveGpxMaps() {
-    let postDatas = [];
-    this.gpxMaps.forEach((gpxMap) => {
-      postDatas.push(gpxMap.toJson());
-    });
-    putGpxAPI(postDatas);
+    if(this.saveLazy){
+      return;
+    }
+    this.saveLazy = setTimeout(() => {
+      let postDatas = [];
+      this.gpxMaps.forEach((gpxMap) => {
+        postDatas.push(gpxMap.toJson());
+      });
+      putGpxAPI(postDatas).then(e => {
+        this.showAlertMessage(1, 'GPX file saved.');
+      }).catch(e => {
+        this.showAlertMessage(2, 'GPX file save failed.');
+      });
+      this.saveLazy = null;
+    }, 500);
   }
 
   selectMap(index, point = null) {
@@ -383,6 +427,7 @@ export class eventManager {
   }
 
   showLoadingPercent(percent, message) {
+    console.log(percent, message);
     this.state.showLoading = true;
     this.state.loadingPercentMax = percent;
     this.loadingMessage = message;

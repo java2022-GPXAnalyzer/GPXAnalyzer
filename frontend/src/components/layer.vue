@@ -5,7 +5,11 @@
       class="m-auto justify-center flex-wrap flex overflow-y-scroll overflow-x-hidden"
       style="max-height: calc(100% - 33px)"
     >
-      <button @click="addGPX" class="button border border-black">
+      <label
+        for="add-gpx"
+        @click="addGPX"
+        class="button border border-black cursor-pointer"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-6 w-6"
@@ -21,7 +25,15 @@
           />
         </svg>
         <span>add GPX</span>
-      </button>
+      </label>
+      <input
+        id="add-gpx"
+        @input="onFileInput"
+        multiple
+        type="file"
+        name=""
+        style="display: none"
+      />
       <div
         v-for="(map, index) in state.gpxMaps"
         :key="map.uuid"
@@ -193,6 +205,15 @@ function selcetMap(index) {
 
 function selectPoint(index, uuid) {
   emi.selectMap(index, uuid);
+}
+
+function onFileInput(e) {
+  const files = e.target.files;
+  let postDataFilePath = [];
+  for (let i = 0; i < files.length; i++) {
+    postDataFilePath.push(files[i].path);
+  }
+  emi.addGpxMaps(postDataFilePath);
 }
 </script>
 <style scoped>

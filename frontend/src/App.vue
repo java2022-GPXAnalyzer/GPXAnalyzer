@@ -2,7 +2,7 @@
   <loading></loading>
   <alert></alert>
   <router-view></router-view>
-</template> 
+</template>
 
 <script setup>
 import alert from '@/components/alert.vue';

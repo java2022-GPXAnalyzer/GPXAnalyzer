@@ -147,3 +147,8 @@ mock.onPut("/gpxApi/gpx/").reply(function(config){
   console.log(config.data);
   return [200, {}];
 });
+
+mock.onPost("/gpxApi/gpx/").reply(function(config){
+  console.log('?', config.data);
+  return [200, {msg: 'success'}];
+});

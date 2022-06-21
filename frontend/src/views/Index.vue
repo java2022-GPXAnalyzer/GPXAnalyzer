@@ -16,6 +16,10 @@ import cesiumMap from '@/components/cesiumMap.vue';
 import toolBar from '@/components/toolBar.vue';
 import infoComponent from '@/components/infoComponent.vue';
 import layer from '@/components/layer.vue';
+
+// import { useRouter } from 'vue-router';
+// const router = useRouter()
+// router.push('/')
 </script>
 <style>
 .button {

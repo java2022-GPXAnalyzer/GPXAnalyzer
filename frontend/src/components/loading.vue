@@ -60,10 +60,10 @@ watch(
   () => emi.state.showLoading,
   (val) => {
     if (val === true) {
-      // state.isLoading = true;
-      // state.loadingPercent = 0;
-      // loadingPercentMax = 0;
-      // percentMethod();
+      state.isLoading = true;
+      state.loadingPercent = 0;
+      loadingPercentMax = 0;
+      percentMethod();
     } else {
       state.isLoading = false;
     }
