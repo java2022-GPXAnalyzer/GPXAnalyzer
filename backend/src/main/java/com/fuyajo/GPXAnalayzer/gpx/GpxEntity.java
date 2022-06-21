@@ -2,6 +2,7 @@ package com.fuyajo.GPXAnalayzer.gpx;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.ArrayList;
 import java.time.Instant;
 
@@ -10,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
+import com.google.gson.JsonObject;
 
 import io.jenetics.jpx.GPX;
 
@@ -40,24 +41,25 @@ public class GpxEntity extends AbstractEntity {
   private final String filepath;
   private final GPX gpx;
 
-  @Expose
   private GpxInfo gpxInfo;
-  @Expose
   private List<WayPointEntity> wayPoints = new ArrayList<>();
   private List<WayPointEntity> routePoints = new ArrayList<>();
-  @Expose
   private List<WayPointEntity> trackPoints = new ArrayList<>();
 
   public GpxEntity(String filepath) throws IOException {
-    this(GpxFileHandler.DEFAULT.read(filepath), filepath);
+    this(GpxFileHandler.DEFAULT.read(filepath), filepath, null);
   }
   
   public GpxEntity(GPX gpx) throws IOException {
-    this(gpx, null);
+    this(gpx, null, null);
   }
 
-  public GpxEntity(GPX gpx, String filepath) throws IOException{
-    super();
+  public GpxEntity(GPX gpx, UUID uuid) throws IOException {
+    this(gpx, null, uuid);
+  }
+
+  private GpxEntity(GPX gpx, String filepath, UUID uuid) throws IOException{
+    super(uuid);
     this.filepath = filepath;
     this.gpx = gpx;
     gpxInfo = new GpxInfo(this);
@@ -131,9 +133,23 @@ public class GpxEntity extends AbstractEntity {
     }
   }
 
+  public void updateGpx() {
+    // TODO: update gpx
+  }
+
   public String toJson() {
     GsonBuilder gpxGsonBuilder = GpxGsonBuilder.getNewBuilder();
     return gpxGsonBuilder.create().toJson(this);
+  }
+
+  public static GpxEntity fromJson(String json) {
+    GsonBuilder gpxGsonBuilder = GpxGsonBuilder.getNewBuilder();
+    return gpxGsonBuilder.create().fromJson(json, GpxEntity.class);
+  }
+
+  public static GpxEntity fromJsonObject(JsonObject jsonObject) {
+    GsonBuilder gpxGsonBuilder = GpxGsonBuilder.getNewBuilder();
+    return gpxGsonBuilder.create().fromJson(jsonObject, GpxEntity.class);
   }
 
   @Override

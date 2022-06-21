@@ -1,10 +1,10 @@
 package com.fuyajo.GPXAnalayzer.gpx;
 
 import java.time.Instant;
+import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.annotations.Expose;
 
 import io.jenetics.jpx.WayPoint;
 
@@ -15,6 +15,11 @@ public class WayPointEntity extends AbstractEntity {
   private final WayPoint wayPoint;
 
   public WayPointEntity(WayPoint wayPoint) {
+    this.wayPoint = wayPoint;
+  }
+
+  public WayPointEntity(WayPoint wayPoint, UUID uuid) {
+    super(uuid);
     this.wayPoint = wayPoint;
   }
 

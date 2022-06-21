@@ -6,6 +6,8 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.UUID;
 
 import io.jenetics.jpx.WayPoint;
 
@@ -26,6 +28,33 @@ public class WayPointEntityAdapter extends TypeAdapter<WayPointEntity>{
   
   @Override
   public WayPointEntity read(JsonReader in) throws IOException {
-    return null;
+    UUID uuid = UUID.randomUUID();
+    double lat = 0.0f;
+    double lon = 0.0f;
+    double ele = 0.0f;
+    Instant time = Instant.ofEpochMilli(0);
+    String name = "";
+    in.beginObject();
+    while (in.hasNext()) {
+      String nextName = in.nextName();
+      if (nextName.equals("uuid")) {
+        uuid = UUID.fromString(in.nextString());
+      } else if (nextName.equals("lat")) {
+        lat = in.nextDouble();
+      } else if (nextName.equals("lon")) {
+        lon = in.nextDouble();
+      } else if (nextName.equals("ele")) {
+        ele = in.nextDouble();
+      } else if (nextName.equals("time")) {
+        time = Instant.parse(in.nextString());
+      } else if (nextName.equals("name")) {
+        name = in.nextString();
+      } else {
+        in.skipValue();
+      }
+    }
+    in.endObject();
+    WayPoint wayPoint = WayPoint.of(lat, lon, ele, time.toEpochMilli()).toBuilder().name(name).build();
+    return new WayPointEntity(wayPoint, uuid);
   }
 }

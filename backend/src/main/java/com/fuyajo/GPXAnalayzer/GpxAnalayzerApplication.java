@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
 import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.fuyajo.GPXAnalayzer.gpx.GpxCollector;
 
 import org.slf4j.Logger;
@@ -85,14 +87,46 @@ public class GpxAnalayzerApplication {
     }
   }
 
-  @PostMapping("gpxApi/uploadGpx")
+  @PostMapping("/gpxApi/uploadGpx")
   public ResponseEntity<?> uploadGpx(@RequestBody String gpxFilePath) {
     try {
       gpxCollector.addByFilepath(gpxFilePath);
       return ResponseEntity.ok("OK, " + "uploaded gpx file uuid: " + gpxCollector.getLast().getUuid());
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     } catch (IOException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
+  @PutMapping("/gpxApi/updateGpx/{gpxId}")
+  public ResponseEntity<?> updateGpx(@PathVariable("gpxId") String gpxId, @RequestBody String gpxJson) {
+    try {
+      Gson gson = GpxGsonBuilder.getNewBuilder().create();
+      GpxEntity gpxEntity = gson.fromJson(gpxJson, GpxEntity.class);
+      gpxCollector.update(gpxEntity);
+      return ResponseEntity.ok("OK, updated gpx file uuid: " + gpxId);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (IOException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
+
+  @PutMapping("/gpxApi/updateGpx")
+  public ResponseEntity<?> updateAllGpx(@RequestBody String allGpxJson) {
+    try {
+      Gson gson = GpxGsonBuilder.getNewBuilder().create();
+      JsonArray allGpxJsonObject = gson.fromJson(allGpxJson, JsonArray.class);
+      for (JsonElement gpxJson : allGpxJsonObject) {
+        GpxEntity gpx = GpxEntity.fromJson(gpxJson.toString());
+        gpxCollector.update(gpx);
+      }
+      return ResponseEntity.ok("OK, updated gpx files");
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (IOException e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }

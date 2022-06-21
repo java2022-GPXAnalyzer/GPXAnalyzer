@@ -1,5 +1,6 @@
 package com.fuyajo.GPXAnalayzer.gpx;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -27,7 +28,7 @@ class GpxEntityTest {
       GpxEntity gpxEntity = new GpxEntity(gpx);
       LOGGER.info("gpxEntity toJson(): " + gpxEntity.toJson());
     } catch (Exception e) {
-      LOGGER.error("test() error: " + e);
+      Assertions.fail("test() error: " + e);
     }
   }
 }

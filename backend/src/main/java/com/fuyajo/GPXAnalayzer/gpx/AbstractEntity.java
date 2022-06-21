@@ -10,6 +10,14 @@ public abstract class AbstractEntity {
     this.uuid = UUID.randomUUID();
   }
 
+  public AbstractEntity(UUID uuid) {
+    if (uuid == null) {
+      this.uuid = UUID.randomUUID();
+    } else {
+      this.uuid = uuid;
+    }
+  }
+
   public UUID getUuid() {
     return uuid;
   }
