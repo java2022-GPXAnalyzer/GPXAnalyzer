@@ -14,6 +14,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import io.jenetics.jpx.GPX;
+import io.jenetics.jpx.Metadata;
+import io.jenetics.jpx.Route;
+import io.jenetics.jpx.Track;
+import io.jenetics.jpx.TrackSegment;
+import io.jenetics.jpx.GPX.Version;
 
 // 包含一個 GPX 檔案的資訊
 /*
@@ -100,6 +105,57 @@ public class GpxEntity extends AbstractEntity {
 
   public void setGpx(GPX gpx) {
     this.gpx = gpx;
+    this.syncDataWithGpx();
+  }
+
+  public void syncGpxWithData() {
+    GPX.Builder gpxBuilder = GPX.builder(
+      Version.of(this.gpxInfo.getVersion()),
+      this.gpxInfo.getCreator()
+    );
+    // add metadata
+    Metadata metadata = Metadata.builder().name(this.gpxInfo.getName()).build();
+    gpxBuilder.metadata(metadata);
+    // add waypoints
+    for (WayPointEntity wayPoint : this.wayPoints) {
+      gpxBuilder.addWayPoint(wayPoint.getWayPoint());
+    }
+    // add route points
+    Route.Builder routeBuilder = Route.builder();
+    for (WayPointEntity routePoint : this.routePoints) {
+      routeBuilder.addPoint(routePoint.getWayPoint());
+    }
+    gpxBuilder.addRoute(routeBuilder.build());
+    // add track points
+    TrackSegment.Builder trackSegmentBuilder = TrackSegment.builder();
+    for (WayPointEntity trackPoint : this.trackPoints) {
+      trackSegmentBuilder.addPoint(trackPoint.getWayPoint());
+    }
+    Track.Builder trackBuilder = Track.builder();
+    trackBuilder.addSegment(trackSegmentBuilder.build());
+    gpxBuilder.addTrack(trackBuilder.build());
+
+    // to gpx entity
+    gpx = gpxBuilder.build();
+  }
+
+  public void syncDataWithGpx() {
+    gpxInfo = new GpxInfo(this);
+    gpx.getWayPoints().forEach(wayPoint -> {
+      wayPoints.add(new WayPointEntity(wayPoint));
+    });
+    gpx.getRoutes().forEach(route -> {
+      route.getPoints().forEach(point -> {
+        routePoints.add(new WayPointEntity(point));
+      });
+    });
+    gpx.getTracks().forEach(track -> {
+      track.getSegments().forEach(segment -> {
+        segment.getPoints().forEach(point -> {
+          trackPoints.add(new WayPointEntity(point));
+        });
+      });
+    });
   }
 
   public GpxInfo getGpxInfo() {
@@ -108,30 +164,40 @@ public class GpxEntity extends AbstractEntity {
 
   public void setGpxInfo(GpxInfo gpxInfo) {
     this.gpxInfo = gpxInfo;
+    this.syncGpxWithData();
   }
 
   public List<WayPointEntity> getWayPoints() {
-    return new ArrayList<>(wayPoints);
+    List<WayPointEntity> newWayPoints = new ArrayList<WayPointEntity>();
+    this.wayPoints.forEach(wayPoint -> newWayPoints.add(new WayPointEntity(wayPoint)));
+    return newWayPoints;
   }
 
   public void setWayPoints(List<WayPointEntity> wayPoints) {
     this.wayPoints = new ArrayList<>(wayPoints);
+    this.syncGpxWithData();
   }
 
   public List<WayPointEntity> getRoutePoints() {
-    return new ArrayList<>(routePoints);
+    List<WayPointEntity> newRoutePoints = new ArrayList<WayPointEntity>();
+    this.routePoints.forEach(routePoint -> newRoutePoints.add(new WayPointEntity(routePoint)));
+    return newRoutePoints;
   }
 
   public void setRoutePoints(List<WayPointEntity> routePoints) {
     this.routePoints = new ArrayList<>(routePoints);
+    this.syncGpxWithData();
   }
 
   public List<WayPointEntity> getTrackPoints() {
-    return new ArrayList<>(trackPoints);
+    List<WayPointEntity> newTrackPoints = new ArrayList<WayPointEntity>();
+    this.trackPoints.forEach(trackPoint -> newTrackPoints.add(new WayPointEntity(trackPoint)));
+    return newTrackPoints;
   }
 
   public void setTrackPoints(List<WayPointEntity> trackPoints) {
     this.trackPoints = new ArrayList<>(trackPoints);
+    this.syncGpxWithData();
   }
 
   public String getStartTime() {

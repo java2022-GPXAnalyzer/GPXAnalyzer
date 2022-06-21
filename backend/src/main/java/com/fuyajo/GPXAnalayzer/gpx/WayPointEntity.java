@@ -15,12 +15,17 @@ public class WayPointEntity extends AbstractEntity {
   private WayPoint wayPoint;
 
   public WayPointEntity(WayPoint wayPoint) {
-    this.wayPoint = wayPoint;
+    this.wayPoint = wayPoint.toBuilder().build();
   }
 
   public WayPointEntity(WayPoint wayPoint, UUID uuid) {
     super(uuid);
-    this.wayPoint = wayPoint;
+    this.wayPoint = wayPoint.toBuilder().build();
+  }
+
+  public WayPointEntity(WayPointEntity wayPointEntity) {
+    super(wayPointEntity.getUuid());
+    this.wayPoint = wayPointEntity.getWayPoint();
   }
 
   public static Double getDistanceWithMeter(WayPointEntity wayPointEntity1, WayPointEntity wayPointEntity2) {
