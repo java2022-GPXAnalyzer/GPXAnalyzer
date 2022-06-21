@@ -41,7 +41,7 @@
       "category": "public.app-category.utilities"
     },
     "win": {
-      "icon": "public/logo.ico",
+      "icon": "public/logo.png",
       "target": [
         {
           "target": "nsis",

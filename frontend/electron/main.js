@@ -7,7 +7,7 @@ function createWindow() {
     height: 600,
     // maximizable: false,
     title: 'GPX Analyzer',
-    icon: path.join(__dirname, 'logo.ico'),
+    icon: '../public/logo.png',
     // resizable: false,
     show: false,
     autoHideMenuBar: false,
