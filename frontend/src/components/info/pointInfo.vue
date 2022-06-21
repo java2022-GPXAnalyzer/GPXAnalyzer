@@ -17,25 +17,26 @@
     PointInfo
   </div>
   <div class="px-3 pt-3">
-    <div class="relative">
+    <!-- <div class="relative">
       <input
         type="text"
         id="uuid_input"
         :value="state.pointData.uuid"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
+        readonly
       />
       <label
         for="uuid_input"
         class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
         >UUID</label
       >
-    </div>
+    </div> -->
     <div class="relative z-0 my-2">
       <input
         type="text"
         id="name_input"
-        :value="state.pointData.name"
+        v-model="state.pointData.name"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
       />
@@ -62,11 +63,12 @@
     </div>
     <div class="relative z-0 my-2">
       <input
-        type="text"
+        type="number"
         id="lat_input"
-        :value="state.pointData.lat"
+        v-model.number="state.pointData.lat"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
+        required
       />
       <label
         for="lat_input"
@@ -76,11 +78,12 @@
     </div>
     <div class="relative z-0 my-2">
       <input
-        type="text"
+        type="number"
         id="lng_input"
-        :value="state.pointData.lng"
+        v-model.number="state.pointData.lng"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
+        required
       />
       <label
         for="lng_input"
@@ -90,11 +93,12 @@
     </div>
     <div class="relative z-0 my-2">
       <input
-        type="text"
+        type="number"
         id="ele_input"
-        :value="state.pointData.ele"
+        v-model.number="state.pointData.ele"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
+        required
       />
       <label
         for="ele_input"
@@ -104,7 +108,7 @@
     </div>
   </div>
   <button
-    @click="removeWayPoint"
+    @click="removePoint"
     class="flex rounded-lg mx-auto my-3 py-2 px-4 hover:bg-red-400 hover:text-white transition duration-500 ease-in-out border border-black m-x-auto"
   >
     <svg
@@ -125,19 +129,75 @@
   </button>
 </template>
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, watch } from 'vue';
+
+import { eventManager } from '@/cesium/eventManager';
+const emi = eventManager.getInstance();
 
 const props = defineProps(['pointData']);
 
 const state = reactive({
-  pointData: computed(() => props.pointData),
+  // pointData: computed(() => props.pointData),
+  pointData: emi.gpxMaps[emi.state.nowSelectMap].findPoints(props.pointData),
 });
 
 function formatData(dateString) {
   const date = new Date(dateString);
-  return new Intl.DateTimeFormat('default', { dateStyle: 'long', timeStyle: 'medium' }).format(date);
+  return new Intl.DateTimeFormat('default', {
+    dateStyle: 'long',
+    timeStyle: 'medium',
+  }).format(date);
 }
 
+function _checkVaildLat(lat) {
+  return lat >= -90 && lat <= 90;
+}
+
+function _checkVaildLng(lng) {
+  return lng >= -180 && lng <= 180;
+}
+
+function _samePostion(a, b) {
+  return a.lat === b.lat && a.lng === b.lng && a.ele === b.ele;
+}
+
+watch(
+  () => {
+    return {
+      lat: state.pointData.lat,
+      lng: state.pointData.lng,
+      ele: state.pointData.ele,
+    };
+  },
+  (newVal, oldVal) => {
+    let isVaild = true;
+    if(!_checkVaildLat(newVal.lat)){
+      state.pointData.lat = oldVal.lat;
+      isVaild = false;
+    }
+    if(!_checkVaildLng(newVal.lng)){
+      state.pointData.lng = oldVal.lng;
+      isVaild = false;
+    }
+    if(newVal.lat === '') {
+      state.pointData.lat = 0;
+      isVaild = false;
+    }
+    if(newVal.lng === '') {
+      state.pointData.lng = 0;
+      isVaild = false;
+    }
+    if(isVaild){
+      console.log('update');
+      emi.gpxMaps[emi.state.nowSelectMap].updatePoint(state.pointData.uuid, newVal);
+      emi.gpxMaps[emi.state.nowSelectMap].reDrawLine();
+    }
+  }
+);
+
+function removePoint() {
+  emi.removePoint(emi.state.nowSelectMap, state.pointData.uuid);
+  console.log(emi.state.nowSelectPoint);
+}
 </script>
-<style>
-</style>
+<style></style>

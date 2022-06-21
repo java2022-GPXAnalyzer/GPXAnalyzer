@@ -38,7 +38,7 @@ export class Handler{
       if (Cesium.defined(pick)){
         var id = Cesium.defaultValue(pick.id, pick.primitive.id);
         if (id instanceof Cesium.Entity) {
-          console.log(id._id)
+          this.emi.clickPoint(id._id);
         }        
       }
       else{
@@ -46,7 +46,7 @@ export class Handler{
       }
       clearTimeout(this.timeout);
       this.timeout = null;
-    }, 250);
+    }, 0);
   }
 
   leftDown(e){

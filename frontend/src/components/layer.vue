@@ -1,7 +1,10 @@
 <template lang="">
   <div class="round-none border-2 border-black w-64 m-1 p-1">
     <p class="title">Map</p>
-    <div class="m-auto justify-center flex-wrap flex overflow-hidden">
+    <div
+      class="m-auto justify-center flex-wrap flex overflow-y-scroll overflow-x-hidden"
+      style="max-height: calc(100% - 33px)"
+    >
       <button @click="addGPX" class="button border border-black">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -64,18 +67,34 @@
         </div>
         <ul>
           <li class="mapLayer" @click="selcetMap(index)">
-            {{ map.name }}
+            {{ map.name || `map${index + 1}` }}
           </li>
           <li>
             <Transition>
               <ul v-if="state.showLayer[index]">
+                <li v-if="map.trkPoints.length > 0" class="child pointsLayer">
+                  trkPoints
+                </li>
                 <li
                   v-for="(point, pointIndex) in map.trkPoints"
-                  :key="pointIndex"
-                  @click="selectPoint(index, point.uuid)"     
-                  class="child pointLayer"
+                  :key="point.uuid"
+                  @click="selectPoint(index, point.uuid)"
+                  class="child2 pointLayer"
                 >
-                  {{ point.uuid }}
+                  <span class="pointName">
+                    {{ point.name || `trkPoint${pointIndex + 1}` }}
+                  </span>
+                </li>
+                <li v-if="map.wayPoints.length > 0" class="child pointsLayer">
+                  wayPoints
+                </li>
+                <li
+                  v-for="(point, pointIndex) in map.wayPoints"
+                  :key="state.updateKey + point.uuid"
+                  @click="selectPoint(index, point.uuid)"
+                  class="child2 pointLayer"
+                >
+                  {{ point.name || `wayPoint${pointIndex + 1}` }}
                 </li>
               </ul>
             </Transition>
@@ -133,6 +152,7 @@ const state = reactive({
   gpxMaps: [],
   showLayer: [],
   showMap: [],
+  updateKey: 0,
 });
 
 let mapLength = 0;
@@ -140,7 +160,6 @@ let mapLength = 0;
 watch(
   () => emi.state.gpxLength,
   (val) => {
-    console.log(val);
     if (val === 0) return;
     if (mapLength < val) {
       let data = emi.gpxMaps;
@@ -149,8 +168,18 @@ watch(
       state.showMap.push(true);
       mapLength = val;
     }
-  },
-  { immediate: true }
+  }
+);
+
+watch(
+  () => emi.state.isPointChanged,
+  (val) => {
+    if (val === false) return;
+    state.updateKey++;
+    emi.state.isPointChanged = false;
+    state.gpxMaps = emi.gpxMaps;
+    console.log(state.gpxMaps.wayPoints);
+  }
 );
 
 function toggleMap(index) {
@@ -158,28 +187,35 @@ function toggleMap(index) {
   emi.toggleMapDisplay(index);
 }
 
-function selcetMap(index){
-  emi.selectMap(index);
-  emi.selectPoint(index, '');
+function selcetMap(index) {
+  emi.selectMap(index, null);
 }
 
-function selectPoint(index, uuid){
-  emi.selectMap(index, false);
-  emi.selectPoint(index, uuid);
+function selectPoint(index, uuid) {
+  emi.selectMap(index, uuid);
 }
-
 </script>
 <style scoped>
 .mapLayer {
-  @apply hover:text-red-400;
-  max-width: 150px;
+  @apply hover:text-red-400 overflow-hidden;
+  max-width: 120px;
   min-width: 100px;
 }
+
 .pointLayer {
   @apply hover:text-blue-400;
-  max-width: 120px;
+  max-width: 100px;
   min-width: 80px;
+  margin-left: 30px;
+  height: 24px;
 }
+
+.pointName {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .option {
   @apply text-xl font-sans p-0 ml-4 mr-1 items-start flex-col;
 }
@@ -200,14 +236,14 @@ li.child::before {
   border-bottom-style: solid;
   border-bottom-width: 1px;
   content: '';
-  width: 1em;
+  width: 2.2em;
   height: 1.1em;
 }
 
 li.child2::before {
   position: absolute;
-  left: -1em;
-  top: -2em;
+  left: -0.7em;
+  top: -0.7em;
   border-left-color: black;
   border-left-style: solid;
   border-left-width: 1px;
@@ -216,7 +252,7 @@ li.child2::before {
   border-bottom-width: 1px;
   content: '';
   width: 1em;
-  height: 2.5em;
+  height: 1.5em;
 }
 
 li.child3::before {
@@ -242,5 +278,18 @@ li.child3::before {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+  background-color: black;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #000000;
 }
 </style>

@@ -24,8 +24,10 @@ export class eventManager {
     nowSelectMap: -1,
     nowSelectPoint: null,
     nowSelectType: 0,
+    isPointChanged: false,
+    nowToolMode: 0
   });
-  
+
   isShowAlert = false;
   isLoaded = false;
   alertMessage = '';
@@ -33,6 +35,8 @@ export class eventManager {
   gpxFilenames = [];
   gpxMaps = [];
   nowToolMode = 0;
+  allMapsStartTime = null;
+  allMapsEndTime = null;
 
   static getInstance() {
     if (!eventManager.instance) {
@@ -47,6 +51,33 @@ export class eventManager {
     return this;
   }
 
+  _maxTime(a, b) {
+    return a > b ? a : b;
+  }
+
+  _minTime(a, b) {
+    return a < b ? a : b;
+  }
+
+  _timeUpdateAllTime(){
+    this.allMapsStartTime = null;
+    this.allMapsEndTime = null;
+    this.gpxMaps.forEach((gpxMap) => {
+      if(this.allMapsStartTime)
+        this.allMapsStartTime = this._minTime(
+          this.allMapsStartTime,
+          gpxMap.getStartTimeClone()
+        );
+      else this.allMapsStartTime = gpxMap.getStartTimeClone();
+      if(this.allMapsEndTime)
+        this.allMapsEndTime = this._maxTime(
+          this.allMapsEndTime,
+          gpxMap.getEndTimeClone()
+        );
+      else this.allMapsEndTime = gpxMap.getEndTimeClone();
+    });
+  }
+
   buildGpxMaps() {
     getGpxListAPI().then(async (res) => {
       this.showLoadingPercent(60, 'GPX analyzing...');
@@ -56,11 +87,13 @@ export class eventManager {
         let gpxMap = new GpxMap(this.viewer, uuid, index);
         await gpxMap.initialize();
         this.gpxMaps.push(gpxMap);
-        this.state.gpxLength += 1;
+        this.state.gpxLength += 1;        
         this.showLoadingPercent(
           60 + (index + 1) * (40 / mapCount),
           'GPX loading...'
         );
+        this._timeUpdateAllTime();
+        this.activeTime();
       });
     });
     return this;
@@ -72,17 +105,49 @@ export class eventManager {
     return this;
   }
 
+  resetHome() {
+    this.activeTime();
+    if(this.state.nowSelectPoint !== null) {
+      this.gpxMaps[this.state.nowSelectMap]
+        .getPoint(this.state.nowSelectPoint)
+        .unhover();
+    }
+    this.state.nowSelectMap = -1;
+    this.state.nowSelectPoint = null;
+    this.state.nowSelectType = SelectType.NONE;
+    this.gpxMaps.forEach((gpxMap) => {
+      gpxMap.unhover();
+    });
+  }
+
   addWayPoint(pointData) {
     if (this.state.nowSelectMap === -1) {
-      // TODO
+      this.showAlertMessage(2, 'Please select a map.');
       return;
     }
-    this.gpxMaps[this.state.nowSelectMap].addPoint('wayPoints', pointData);
-    this.toggleWayPointRequest(-1);
+    let uuid = this.gpxMaps[this.state.nowSelectMap].addPoint(
+      'wayPoints',
+      pointData
+    );
+    if(this.state.nowSelectPoint !== null) {
+      this.gpxMaps[this.state.nowSelectMap]
+        .getPoint(this.state.nowSelectPoint)
+        .unhover();
+    }
+    this.state.isPointChanged = true;
+    this.state.nowSelectPoint = uuid;
+    this.state.nowSelectType = SelectType.POINT;
+    this.toggleWayPointRequest();
   }
 
   removePoint(mapIdx, pointId) {
+    this.state.nowSelectPoint = null;
+    this.state.nowSelectType = SelectType.MAP;
+    this.state.isPointChanged = true;
     this.gpxMaps[mapIdx].removePoint(pointId);
+    this.gpxMaps[mapIdx].reDrawLine();
+    this._timeUpdateAllTime();
+    this.activeTime();
   }
 
   reDrawLine(id) {
@@ -93,12 +158,28 @@ export class eventManager {
     });
   }
 
+  activeTime() {
+    this.viewer.clock.startTime = this.allMapsStartTime.clone();
+    this.viewer.clock.stopTime = this.allMapsEndTime.clone();
+    this.viewer.clock.currentTime = this.allMapsStartTime.clone();
+  }
+
   // Handler event
   callClick(pick, cartesian) {
     if (this.nowToolMode === ToolBar.NORMAL) {
       // TODO
     } else if (this.nowToolMode === ToolBar.ADDWAYPOINT) {
       this.addWayPoint(cartesian);
+    }
+  }
+
+  clickPoint(id) {
+    for(let i = 0; i < this.gpxMaps.length; i++) {
+      if(this.gpxMaps[i].isHasPoint(id)) {
+        this.selectMap(i, id);
+        this.gpxMaps[i].hover(id);
+        return;
+      }
     }
   }
 
@@ -147,25 +228,36 @@ export class eventManager {
     putGpxAPI(postDatas);
   }
 
-  selectMap(index, toggle = true) {
-    if (this.state.nowSelectMap !== -1 && this.state.nowSelectMap !== index ) {
+  selectMap(index, point = null) {
+    if (
+      this.state.nowSelectMap === index &&
+      this.state.nowSelectType === SelectType.MAP &&
+      !point
+    ) {
       this.unhover(this.state.nowSelectMap);
+      this.state.nowSelectMap = -1;
+      this.state.nowSelectType = SelectType.NONE;
+      return;
     }
-    if (index >= -1 && index <= this.gpxMaps.length) {
-      if (this.state.nowSelectMap !== index || !toggle) {
-        this.state.nowSelectMap = index;
-        this.state.nowSelectType = SelectType.MAP;
+    if (this.state.nowSelectType !== SelectType.NONE) {
+      if (this.state.nowSelectMap !== index) {
+        this.unhover(this.state.nowSelectMap);
         this.hover(index);
-      } else {
-        this.state.nowSelectMap = -1;
-        this.state.nowSelectType = SelectType.NONE;
       }
+      if(this.state.nowSelectPoint !== null) {
+        this.gpxMaps[this.state.nowSelectMap]
+          .getPoint(this.state.nowSelectPoint)
+          .unhover();
+      }
+    } else {
+      this.hover(index);
     }
-  }
-
-  selectPoint(index, pointId) {
-    this.state.nowSelectType = SelectType.POINT;
-    this.state.nowSelectPoint = pointId;
+    this.state.nowSelectMap = index;
+    this.state.nowSelectPoint = point;
+    this.state.nowSelectType = point ? SelectType.POINT : SelectType.MAP;
+    if (point) {
+      this.gpxMaps[index].getPoint(point).hover();
+    }
   }
 
   getInfo() {
@@ -191,27 +283,39 @@ export class eventManager {
   changeMode(mode) {
     if (mode >= 0 && mode <= 1) {
       this.nowToolMode = mode;
+      this.state.nowToolMode = mode;
     }
   }
 
-  toggleWayPointRequest(mapIdx) {
+  toggleWayPointRequest() {
     if (this.nowToolMode !== ToolBar.ADDWAYPOINT) {
       this.changeMode(ToolBar.ADDWAYPOINT);
-      this.selectMap(mapIdx);
     } else {
       this.changeMode(ToolBar.NORMAL);
-      this.selectMap(-1);
     }
   }
 
   // Toolbar event
+
+  _compareTime(time1, time2) {
+    return time1.dayNumber === time2.dayNumber && time1.secondsOfDay === time2.secondsOfDay;
+  }
+
+  _checkViewerClock() {
+    return this._compareTime(this.viewer.clock.startTime, this.viewer.clock.stopTime);
+  }
 
   setTracking(mapIdx) {
     this.gpxMaps[mapIdx].activeTime();
   }
 
   beginTracking() {
+    if(this._checkViewerClock()){
+      this.showAlertMessage(1, 'Please select other map.');
+      return false;
+    }
     this.viewer.clock.shouldAnimate = true;
+    return true;
   }
 
   stopTracking() {
@@ -219,7 +323,6 @@ export class eventManager {
   }
 
   setTrakingSpeed(speed) {
-    console.log(speed);
     this.viewer.clock.multiplier = speed;
   }
 
@@ -232,13 +335,14 @@ export class eventManager {
     this.viewer.camera.setView({
       destination: Cesium.Cartesian3.fromDegrees(121.0, 23.5, 550000.0),
     });
+    this.resetHome();
   }
 
-  zoomIn(){
+  zoomIn() {
     this.viewer.camera.zoomIn();
   }
 
-  zoomOut(){
+  zoomOut() {
     this.viewer.camera.zoomOut();
   }
 
@@ -259,10 +363,12 @@ export class eventManager {
 
   hover(mapIdx) {
     this.gpxMaps[mapIdx].hover();
+    this.gpxMaps[mapIdx].activeTime();
   }
 
   unhover(mapIdx) {
     this.gpxMaps[mapIdx].unhover();
+    this.activeTime();
   }
 
   // alert event
@@ -277,7 +383,6 @@ export class eventManager {
   }
 
   showLoadingPercent(percent, message) {
-    console.log(percent, message);
     this.state.showLoading = true;
     this.state.loadingPercentMax = percent;
     this.loadingMessage = message;

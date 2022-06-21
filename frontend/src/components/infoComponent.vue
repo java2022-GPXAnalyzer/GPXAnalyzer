@@ -1,7 +1,7 @@
 <template lang="">
   <div class="round-none border-2 border-black w-64 p-1 m-1">
-    <map-info v-if="state.showMapInfo" :map-data="state.mapData"></map-info>
-    <point-info v-if="state.showPointInfo" :point-data="state.pointData"></point-info>
+    <map-info v-if="state.showMapInfo" :map-data="state.mapDataIdx" :key="state.mapDataIdx"></map-info>
+    <point-info v-if="state.showPointInfo" :point-data="state.pointDataId" :key="state.pointDataId"></point-info>
   </div>
 </template>
 <script setup>
@@ -13,8 +13,9 @@ import { eventManager } from '@/cesium/eventManager';
 const emi = eventManager.getInstance();
 
 const state = reactive({
-  mapData: {},
   pointData: {},
+  mapDataIdx: null,
+  pointDataId: null,
   showMapInfo: false,
   showPointInfo: false
 });
@@ -23,10 +24,10 @@ watch(
   () => emi.state.nowSelectMap,
   (val) => {
     if (val >= 0) {
-      state.mapData = emi.gpxMaps[val];
+      state.mapDataIdx = val;
       state.showMapInfo = true;
     } else if (val === -1) {
-      state.mapData = {};
+      state.mapDataIdx = null;
       state.showMapInfo = false;
     }
   }
@@ -35,10 +36,9 @@ watch(
 watch(
   () => emi.state.nowSelectPoint,
   (val) => {
-    console.log(val);
-    if (val !== ''){
-      console.log('??', emi.state.nowSelectMap);
+    if (val !== null){
       state.pointData = emi.gpxMaps[emi.state.nowSelectMap].getPoint(val);
+      state.pointDataId = val;
       state.showPointInfo = true;
     } else {
       state.pointData = {};

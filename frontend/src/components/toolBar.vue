@@ -210,38 +210,57 @@ const state = reactive({
   reset: false,
 });
 
-watch(()=>state.velocity, (val)=>{
-  console.log(val)
-  emi.setTrakingSpeed(val);
-})
+function _isNotANumber(inputData) {
+  if (parseFloat(inputData).toString() === 'NaN') {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+watch(
+  () => state.velocity,
+  (val) => {
+    if (val > 9999) {
+      state.velocity = 9999;
+    } else if (val < -999) {
+      state.velocity = -999;
+    }
+    if (_isNotANumber(val)) {
+      emi.setTrakingSpeed(val);
+    }
+  }
+);
+
+function save() {
+  emi.saveGpxMaps();
+}
 
 function start() {
-  // viewer.clock.shouldAnimate = true;
-  emi.beginTracking();
-  state.start = true;
+  let res = emi.beginTracking();
+  state.start = res === true;
 }
 
 function pause() {
-  // viewer.clock.shouldAnimate = false;
   emi.stopTracking();
   state.start = false;
 }
 
 function reduceVelocity() {
   state.velocity -= 1;
-  if(state.velocity == 0) state.velocity = -1;
+  if (state.velocity == 0) state.velocity = -1;
 }
 
 function addVelocity() {
   state.velocity = parseInt(state.velocity) + 1;
-  if(state.velocity == 0) state.velocity = 1;
+  if (state.velocity == 0) state.velocity = 1;
 }
 
 function movementRateDistributionMap() {
   emi.toggleSpeedDistribution();
 }
 
-function large(){
+function large() {
   emi.fullScreen();
 }
 

@@ -17,25 +17,26 @@
     MapInfo
   </div>
   <div class="px-3 pt-3">
-    <div class="relative">
+    <!-- <div class="relative">
       <input
         type="text"
         id="uuid_input"
         :value="state.mapData.uuid"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
+        readonly
       />
       <label
         for="uuid_input"
         class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] left-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4"
         >UUID</label
       >
-    </div>
+    </div> -->
     <div class="relative z-0 my-2">
       <input
         type="text"
         id="name_input"
-        :value="state.mapData.name"
+        v-model="state.mapData.name"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
       />
@@ -80,7 +81,7 @@
       <input
         type="text"
         id="creator_input"
-        :value="state.mapData.creator"
+        v-model="state.mapData.creator"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
       />
@@ -94,6 +95,7 @@
   <button
     @click="addWayPoint"
     class="flex rounded-lg mx-auto my-2 py-2 px-4 hover:bg-red-400 hover:text-white transition duration-500 ease-in-out border border-black m-x-auto"
+    :class="{'bg-red-400': state.addingPoint, 'text-white': state.addingPoint}"
   >
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -113,12 +115,17 @@
   </button>
 </template>
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, watch } from 'vue';
+
+import { eventManager } from '@/cesium/eventManager';
+const emi = eventManager.getInstance();
 
 const props = defineProps(['mapData']);
 
 const state = reactive({
-  mapData: computed(() => props.mapData),
+  // mapData: computed(() => emi.gpxMaps[props.mapData]),
+  mapData: emi.gpxMaps[props.mapData],
+  addingPoint: false
 });
 
 function formatData(dateString) {
@@ -126,6 +133,18 @@ function formatData(dateString) {
   return new Intl.DateTimeFormat('default', { dateStyle: 'long', timeStyle: 'medium' }).format(date);
 }
 
-console.log(state.mapData);
+function addWayPoint(){
+  // addingPoint = true;
+  emi.toggleWayPointRequest();
+}
+
+watch(
+  () => emi.state.nowToolMode,
+  (val) => {
+    state.addingPoint = val === 1;
+  }
+)
+
+// console.log('!!!!!mapinfo', state.mapData.name);
 </script>
 <style></style>

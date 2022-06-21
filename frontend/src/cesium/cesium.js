@@ -128,10 +128,12 @@ export class WayPoint {
 
   hover() {
     this.entity.point.color = Cesium.Color.BLUE;
+    this.entity.point.pixelSize = 16;
   }
 
   unhover() {
     this.entity.point.color = Cesium.Color.RED;
+    this.entity.point.pixelSize = 8;
   }
 
   toggleDisplay() {
@@ -148,6 +150,10 @@ export class WayPoint {
     this.ele = position.ele;
     this.position = Cesium.Cartesian3.fromDegrees(this.lng, this.lat, this.ele);
     return this.position;
+  }
+
+  _checkSamePointData(pointData) {
+    return this.lat === pointData.lat && this.lng === pointData.lng && this.ele === pointData.ele;
   }
 
   update(pointData) {
@@ -204,7 +210,6 @@ export class GpxMap {
     this.creator = info.creator;
     this.version = info.version;
     this.name = info.name || '';
-    this.activeTime();
   }
 
   async loadTrkPoints() {
@@ -272,7 +277,8 @@ export class GpxMap {
       this.activeTime();
       this.reDrawLine();
     }
-    return point;
+    point.hover();
+    return point.uuid;
   }
 
   updatePoint(id, pointData) {
@@ -309,13 +315,15 @@ export class GpxMap {
       this.startTime = this.trkPoints[0].getTime();
       this.endTime = this.trkPoints[this.trkPoints.length - 1].getTime();
       this.activeTime();
+      return [this.startTime, this.endTime];
     }
+    return null;
   }
 
   updateGpxInfo(gpxInfo) {
     this.name = gpxInfo.name;
     this.creator = gpxInfo.creator;
-    this.version = gpxInfo.version;
+    // this.version = gpxInfo.version;
   }
 
   drawLine() {
@@ -445,6 +453,7 @@ export class GpxMap {
   }
 
   toJson() {
+    this.isChanged = false;
     return {
       gpxInfo: {
         uuid: this.uuid,
