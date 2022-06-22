@@ -1,5 +1,6 @@
 <template lang="">
   <div class="round-none border-2 border-black w-64 p-1 m-1">
+    <hot-spot v-if="state.showHotSpot"></hot-spot>
     <map-info v-if="state.showMapInfo" :map-data="state.mapDataIdx" :key="state.mapDataIdx"></map-info>
     <point-info v-if="state.showPointInfo" :point-data="state.pointDataId" :key="state.pointDataId"></point-info>
   </div>
@@ -7,6 +8,7 @@
 <script setup>
 import mapInfo from '@/components/info/mapInfo.vue';
 import pointInfo from '@/components/info/pointInfo.vue';
+import hotSpot from '@/components/info/hotSpot.vue';
 
 import { reactive, watch } from 'vue';
 import { eventManager } from '@/cesium/eventManager';
@@ -17,7 +19,8 @@ const state = reactive({
   mapDataIdx: null,
   pointDataId: null,
   showMapInfo: false,
-  showPointInfo: false
+  showPointInfo: false,
+  showHotSpot: false,
 });
 
 watch(
@@ -46,6 +49,19 @@ watch(
     }
   }
 )
+
+watch(
+  () => emi.state.hotSpot,
+  (val) => {
+    console.log(val);
+    if(val){
+      state.showHotSpot = true;
+    } else {
+      state.showHotSpot = false;
+    }
+  }
+)
+
 </script>
 <style scoped>
 </style>

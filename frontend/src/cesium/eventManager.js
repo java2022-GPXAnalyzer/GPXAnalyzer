@@ -1,4 +1,9 @@
-import { getGpxListAPI, postGpxFilePathAPI, putGpxAPI } from '@/api/index';
+import {
+  getGpxListAPI,
+  postGpxFilePathAPI,
+  putGpxAPI,
+  getGpxHotSpotAPI,
+} from '@/api/index';
 import { GpxMap } from '@/cesium/cesium';
 import { Handler } from '@/cesium/handler';
 import * as Cesium from 'cesium';
@@ -27,7 +32,8 @@ export class eventManager {
     nowSelectPoint: null,
     nowSelectType: 0,
     isPointChanged: false,
-    nowToolMode: 0
+    nowToolMode: 0,
+    hotSpot: false
   });
 
   isShowAlert = false;
@@ -80,17 +86,17 @@ export class eventManager {
     return a < b ? a : b;
   }
 
-  _timeUpdateAllTime(){
+  _timeUpdateAllTime() {
     this.allMapsStartTime = null;
     this.allMapsEndTime = null;
     this.gpxMaps.forEach((gpxMap) => {
-      if(this.allMapsStartTime)
+      if (this.allMapsStartTime)
         this.allMapsStartTime = this._minTime(
           this.allMapsStartTime,
           gpxMap.getStartTimeClone()
         );
       else this.allMapsStartTime = gpxMap.getStartTimeClone();
-      if(this.allMapsEndTime)
+      if (this.allMapsEndTime)
         this.allMapsEndTime = this._maxTime(
           this.allMapsEndTime,
           gpxMap.getEndTimeClone()
@@ -102,13 +108,14 @@ export class eventManager {
   buildGpxMaps() {
     getGpxListAPI().then(async (res) => {
       this.showLoadingPercent(60, 'GPX analyzing...');
-      res = res.data.result;
+      console.log(res);
+      res = res.data;
       let mapCount = res.length;
       res.forEach(async (uuid, index) => {
         let gpxMap = new GpxMap(this.viewer, uuid, index);
         await gpxMap.initialize();
         this.gpxMaps.push(gpxMap);
-        this.state.gpxLength += 1;        
+        this.state.gpxLength += 1;
         this.showLoadingPercent(
           60 + (index + 1) * (40 / mapCount),
           'GPX loading...'
@@ -119,7 +126,7 @@ export class eventManager {
     });
     return this;
   }
-  
+
   initializeHandler() {
     this.handler = new Handler(this.viewer);
     this.handler.initialize();
@@ -128,7 +135,7 @@ export class eventManager {
 
   resetHome() {
     this.activeTime();
-    if(this.state.nowSelectPoint !== null) {
+    if (this.state.nowSelectPoint !== null) {
       this.gpxMaps[this.state.nowSelectMap]
         .getPoint(this.state.nowSelectPoint)
         .unhover();
@@ -150,7 +157,7 @@ export class eventManager {
       'wayPoints',
       pointData
     );
-    if(this.state.nowSelectPoint !== null) {
+    if (this.state.nowSelectPoint !== null) {
       this.gpxMaps[this.state.nowSelectMap]
         .getPoint(this.state.nowSelectPoint)
         .unhover();
@@ -195,8 +202,8 @@ export class eventManager {
   }
 
   clickPoint(id) {
-    for(let i = 0; i < this.gpxMaps.length; i++) {
-      if(this.gpxMaps[i].isHasPoint(id)) {
+    for (let i = 0; i < this.gpxMaps.length; i++) {
+      if (this.gpxMaps[i].isHasPoint(id)) {
         this.selectMap(i, id);
         this.gpxMaps[i].hover(id);
         return;
@@ -209,9 +216,7 @@ export class eventManager {
     filenames = filenames.filter((filename) => {
       return this.gpxFilenames.indexOf(filename) === -1;
     });
-    filenames.forEach((filename) => {
-      this.gpxFilenames.push(filename);
-    });
+    // console.log(filenames[0], typeof filenames[0]);
     return postGpxFilePathAPI(filenames);
   }
 
@@ -229,7 +234,6 @@ export class eventManager {
   }
 
   updateGpxPoint(id, gpxPoint) {
-    // TODO
     this.gpxMaps.forEach((gpxMap) => {
       if (gpxMap.isHasPoint(id)) {
         gpxMap.updatePoint(id, gpxPoint);
@@ -238,24 +242,30 @@ export class eventManager {
   }
 
   addGpxMaps(filenames) {
-    this.postGPXFile(filenames).then((res) => {
-      res = res.data.result;
-      // console.log(res.data);
-      res.forEach(async (uuid) => {
-        let gpxMap = new GpxMap(this.viewer, uuid, this.gpxMaps.length);
-        await gpxMap.initialize();
-        this.gpxMaps.push(gpxMap);
-        this.state.gpxLength += 1;
-        this._timeUpdateAllTime();
-        this.activeTime();
+    this.postGPXFile(filenames)
+      .then((res) => {
+        console.log(res);
+        res = res.data;
+        filenames.forEach((filename) => {
+          this.gpxFilenames.push(filename);
+        });
+        res.forEach(async (uuid) => {
+          let gpxMap = new GpxMap(this.viewer, uuid, this.gpxMaps.length);
+          await gpxMap.initialize();
+          this.gpxMaps.push(gpxMap);
+          this.state.gpxLength += 1;
+          this._timeUpdateAllTime();
+          this.activeTime();
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        this.showAlertMessage(2, 'GPX file upload failed.');
       });
-    }).catch(e => {
-      this.showAlertMessage(2, 'GPX file upload failed.');
-    });
   }
 
   saveGpxMaps() {
-    if(this.saveLazy){
+    if (this.saveLazy) {
       return;
     }
     this.saveLazy = setTimeout(() => {
@@ -263,11 +273,13 @@ export class eventManager {
       this.gpxMaps.forEach((gpxMap) => {
         postDatas.push(gpxMap.toJson());
       });
-      putGpxAPI(postDatas).then(e => {
-        this.showAlertMessage(1, 'GPX file saved.');
-      }).catch(e => {
-        this.showAlertMessage(2, 'GPX file save failed.');
-      });
+      putGpxAPI(postDatas)
+        .then((e) => {
+          this.showAlertMessage(1, 'GPX file saved.');
+        })
+        .catch((e) => {
+          this.showAlertMessage(2, 'GPX file save failed.');
+        });
       this.saveLazy = null;
     }, 500);
   }
@@ -288,7 +300,7 @@ export class eventManager {
         this.unhover(this.state.nowSelectMap);
         this.hover(index);
       }
-      if(this.state.nowSelectPoint !== null) {
+      if (this.state.nowSelectPoint !== null) {
         this.gpxMaps[this.state.nowSelectMap]
           .getPoint(this.state.nowSelectPoint)
           .unhover();
@@ -339,14 +351,26 @@ export class eventManager {
     }
   }
 
+  async getHotSpot(){
+    let res = await getHotSpotAPI();
+    res = res.data;
+    return res;
+  }
+
   // Toolbar event
 
   _compareTime(time1, time2) {
-    return time1.dayNumber === time2.dayNumber && time1.secondsOfDay === time2.secondsOfDay;
+    return (
+      time1.dayNumber === time2.dayNumber &&
+      time1.secondsOfDay === time2.secondsOfDay
+    );
   }
 
   _checkViewerClock() {
-    return this._compareTime(this.viewer.clock.startTime, this.viewer.clock.stopTime);
+    return this._compareTime(
+      this.viewer.clock.startTime,
+      this.viewer.clock.stopTime
+    );
   }
 
   setTracking(mapIdx) {
@@ -354,7 +378,7 @@ export class eventManager {
   }
 
   beginTracking() {
-    if(this._checkViewerClock()){
+    if (this._checkViewerClock()) {
       this.showAlertMessage(1, 'Please select other map.');
       return false;
     }
@@ -413,6 +437,35 @@ export class eventManager {
   unhover(mapIdx) {
     this.gpxMaps[mapIdx].unhover();
     this.activeTime();
+  }
+
+  changeMap(map) {
+    var url =
+      'https://mt1.google.cn/vt/lyrs=s&hl=zh-TW&x={x}&y={y}&z={z}&s=Gali';
+    let google = new Cesium.UrlTemplateImageryProvider({ url: url });
+
+    let bing = new Cesium.BingMapsImageryProvider({
+      url: 'https://dev.virtualearth.net',
+      culture: 'zh-Hant',
+      key: 'AtkX3zhnRe5fyGuLU30uZw8r3sxdBDnpQly7KfFTCB2rGlDgXBG3yr-qEiQEicEc',
+    });
+
+    let maps = [bing, google];
+
+    console.log(map);
+
+    // this.viewer.imageryLayers.removeAll();
+    this.viewer.imageryLayers.addImageryProvider(maps[map]);
+  }
+
+  toggleHotSpot() {
+    console.log('toggleHotSpot'); 
+    if (this.state.hotSpot === true) {
+      this.state.hotSpot = false;
+    }
+    else {
+      this.state.hotSpot = true;
+    }
   }
 
   // alert event

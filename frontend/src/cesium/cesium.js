@@ -3,6 +3,7 @@ import {
   getGpxInfoAPI,
   getGpxTrackPointsAPI,
   getGpxWayPointsAPI,
+  getGpxTrackPointsSpeedColorAPI
 } from '@/api/index';
 
 export class CesiumUtility {
@@ -88,7 +89,7 @@ export class WayPoint {
 
   constructor(viewer, point) {
     this.viewer = viewer;
-    this.lng = parseFloat(point.lng);
+    this.lng = parseFloat(point.lng || point.lon);
     this.lat = parseFloat(point.lat);
     // TODO ele
     this.ele = parseFloat(point.ele);
@@ -146,7 +147,7 @@ export class WayPoint {
 
   _updatePosition(position) {
     this.lat = position.lat;
-    this.lng = position.lng;
+    this.lng = position.lng || position.lon;
     this.ele = position.ele;
     this.position = Cesium.Cartesian3.fromDegrees(this.lng, this.lat, this.ele);
     return this.position;
@@ -204,7 +205,7 @@ export class GpxMap {
 
   async loadGpxInfo() {
     var info = await getGpxInfoAPI(this.uuid);
-    info = info.data.result;
+    info = info.data;
     this.startTime = Cesium.JulianDate.fromIso8601(info.startTime);
     this.endTime = Cesium.JulianDate.fromIso8601(info.endTime);
     this.creator = info.creator;
@@ -214,7 +215,7 @@ export class GpxMap {
 
   async loadTrkPoints() {
     var trkPoints = await getGpxTrackPointsAPI(this.uuid);
-    trkPoints = trkPoints.data.result;
+    trkPoints = trkPoints.data;
     if (trkPoints === null || trkPoints.length === 0) {
       return;
     }
@@ -226,7 +227,7 @@ export class GpxMap {
 
   async loadWayPoints() {
     var wayPoints = await getGpxWayPointsAPI(this.uuid);
-    wayPoints = wayPoints.data.result;
+    wayPoints = wayPoints.data;
     if (wayPoints === null || wayPoints.length === 0) {
       return;
     }
@@ -356,18 +357,20 @@ export class GpxMap {
     this.isDrawed = true;
   }
 
-  _drawSpeedDistribution() {
+  async _drawSpeedDistribution() {
     if(this.gradientColor === null) {
       // TODO
+      let res = await getGpxTrackPointsSpeedColorAPI();
+      res = res.data;
       this.gradientColor = CesiumUtility.getGradientColor(
-        [0, 0.25, 0.5, 0.75, 1],
-        [0, 0.75, 1, 0.2, 0.2]
+        res.speed || [],
+        res.distance || []
       );
     }
     this.entity.path.material = this.gradientColor;
   }
 
-  toggleSpeedDistribution() {
+  async toggleSpeedDistribution() {
     if (this.isChanged){
       return false;
     }
@@ -375,7 +378,7 @@ export class GpxMap {
       this.entity.path.material = CesiumUtility.getColor(this.index);
       this.isSpeedDistribution = false;
     } else {
-      this._drawSpeedDistribution();
+      await this._drawSpeedDistribution();
       this.isSpeedDistribution = true;
     }
     return true;

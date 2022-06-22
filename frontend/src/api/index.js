@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import MockAdapter from 'axios-mock-adapter';
 
-var mock = new MockAdapter(axios, { delayResponse: 100 });
+// var mock = new MockAdapter(axios, { delayResponse: 100 });
 
 const gpxsRequest = axios.create({
   baseURL: '/gpxApi/idList/',
@@ -14,17 +14,30 @@ const gpxMapRequest = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const gpxUploadMapRequest = axios.create({
+  baseURL: '/gpxApi/uploadGpx',
+  headers: { 'Content-Type': 'application/json' },
+});
+
+const gpxHotSpotRequest = axios.create({
+  baseURL: '/gpxApi/hotSpot/',
+  headers: { 'Content-Type': 'application/json' },
+});
+
 
 export const getGpxListAPI = () => gpxsRequest.get();
 
 export const getGpxAPI = (id) => gpxMapRequest.get(id);
 export const getGpxInfoAPI = (id) => gpxMapRequest.get(id + '/gpxInfo');
 export const getGpxTrackPointsAPI = (id) => gpxMapRequest.get(id + '/trackPoints');
+export const getGpxTrackPointsSpeedColorAPI = (id) => gpxMapRequest.get(id + '/trackPoints/speedColorInfo');
 export const getGpxWayPointsAPI = (id) => gpxMapRequest.get(id + '/wayPoints');
 
-export const postGpxFilePathAPI = (filepaths) => gpxMapRequest.post('', filepaths);
-export const putGpxAPI = (gpx) => gpxMapRequest.put('', gpx);
-export const putGpxAPIForId = (id, gpx) => gpxMapRequest.put(id, gpx);
+export const postGpxFilePathAPI = (filepaths) => gpxUploadMapRequest.post('', filepaths);
+export const putGpxAPI = (gpx) => gpxUploadMapRequest.put('', gpx);
+export const putGpxAPIForId = (id, gpx) => gpxUploadMapRequest.put(id, gpx);
+
+export const getGpxHotSpotAPI = () => gpxHotSpotRequest.get();
 
 // MOCK DATA
 
@@ -101,54 +114,54 @@ const MOCkData = {
   ],
 };
 
-mock.onGet("/gpxApi/idList/").reply(200, {
-  status: 200,
-  msg: '',
-  result: ['testMap', 'testMap2']
-});
+// mock.onGet("/gpxApi/idList/").reply(200, {
+//   status: 200,
+//   msg: '',
+//   result: ['testMap', 'testMap2']
+// });
 
-mock.onGet("/gpxApi/gpx/testMap/gpxInfo").reply(200, {
-  status: 200,
-  msg: '',
-  result: MOCkData.maps[0]
-});
+// mock.onGet("/gpxApi/gpx/testMap/gpxInfo").reply(200, {
+//   status: 200,
+//   msg: '',
+//   result: MOCkData.maps[0]
+// });
 
-mock.onGet("/gpxApi/gpx/testMap/trackPoints").reply(200, {
-  status: 200,
-  msg: '',
-  result: MOCkData.maps[0].trkpoints
-});
+// mock.onGet("/gpxApi/gpx/testMap/trackPoints").reply(200, {
+//   status: 200,
+//   msg: '',
+//   result: MOCkData.maps[0].trkpoints
+// });
 
-mock.onGet("/gpxApi/gpx/testMap/wayPoints").reply(200, {
-  status: 200,
-  msg: '',
-  result: null
-});
+// mock.onGet("/gpxApi/gpx/testMap/wayPoints").reply(200, {
+//   status: 200,
+//   msg: '',
+//   result: null
+// });
 
-mock.onGet("/gpxApi/gpx/testMap2/gpxInfo").reply(200, {
-  status: 200,
-  msg: '',
-  result: MOCkData.maps[1]
-});
+// mock.onGet("/gpxApi/gpx/testMap2/gpxInfo").reply(200, {
+//   status: 200,
+//   msg: '',
+//   result: MOCkData.maps[1]
+// });
 
-mock.onGet("/gpxApi/gpx/testMap2/trackPoints").reply(200, {
-  status: 200,
-  msg: '',
-  result: MOCkData.maps[1].trkpoints
-});
+// mock.onGet("/gpxApi/gpx/testMap2/trackPoints").reply(200, {
+//   status: 200,
+//   msg: '',
+//   result: MOCkData.maps[1].trkpoints
+// });
 
-mock.onGet("/gpxApi/gpx/testMap2/wayPoints").reply(200, {
-  status: 200,
-  msg: '',
-  result: null
-});
+// mock.onGet("/gpxApi/gpx/testMap2/wayPoints").reply(200, {
+//   status: 200,
+//   msg: '',
+//   result: null
+// });
 
-mock.onPut("/gpxApi/gpx/").reply(function(config){
-  console.log(config.data);
-  return [200, {}];
-});
+// mock.onPut("/gpxApi/gpx/").reply(function(config){
+//   console.log(config.data);
+//   return [200, {}];
+// });
 
-mock.onPost("/gpxApi/gpx/").reply(function(config){
-  console.log('?', config.data);
-  return [200, {msg: 'success'}];
-});
+// mock.onPost("/gpxApi/gpx/").reply(function(config){
+//   console.log('?', config.data);
+//   return [200, {msg: 'success'}];
+// });

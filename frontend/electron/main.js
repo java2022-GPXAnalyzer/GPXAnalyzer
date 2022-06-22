@@ -12,7 +12,7 @@ function createWindow() {
     show: false,
     autoHideMenuBar: false,
     webPreferences: {
-      devTools: false,
+      devTools: process.env.NODE_ENV === 'development',
       preload: path.join(__dirname, 'preload.js'),
       webSecurity: false
     }
@@ -33,7 +33,7 @@ function createWindow() {
 
   // Open the DevTools.
   if (process.env.NODE_ENV === 'development') {
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
   }
 
   ipcMain.on('gotoCesium', () => {

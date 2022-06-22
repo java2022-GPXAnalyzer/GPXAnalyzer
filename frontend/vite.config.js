@@ -15,11 +15,11 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
+      '/gpxApi': {
         target: 'http://localhost:8081/',
         changeOrigin: true,
         pathRewrite: {
-          '^/api': '',
+          '^/gpxApi': '',
         },
       },
     },

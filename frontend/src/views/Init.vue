@@ -8,6 +8,7 @@
           <span class="sr-only">Choose profile photo</span>
           <input
             type="file"
+            ref="file"
             @input="onFileInput"
             multiple
             class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-blue-500 hover:file:bg-blue-200"
@@ -22,7 +23,7 @@
   </div>
 </template>
 <script setup>
-import { reactive } from 'vue';
+import { ref } from 'vue';
 import { postGpxFilePathAPI } from '@/api/index';
 
 import { eventManager } from '@/cesium/eventManager';
@@ -30,6 +31,8 @@ const emi = eventManager.getInstance();
 
 import { useRouter } from 'vue-router';
 const router = useRouter();
+
+const file = ref('file');
 
 function onFileInput(e) {
   const files = e.target.files;
@@ -40,13 +43,17 @@ function onFileInput(e) {
   emi
     .postGPXFile(postDataFilePath)
     .then((res) => {
+      postDataFilePath.forEach((file) => {
+        emi.gpxFilenames.push(file);
+      });
       window.$electron.ipcRenderer.send('gotoCesium');
       emi.showLoadingPercent(5, 'gpx loaded...');
       setTimeout(() => {
         router.push('/index');
       }, 500);
     })
-    .catch(() => {
+    .catch(err => {
+      file.value.value = '';
       emi.showAlertMessage(2, 'Error while uploading file');
     });
 }
