@@ -19,8 +19,18 @@ const gpxUploadMapRequest = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+const gpxUpdateMapRequest = axios.create({
+  baseURL: '/gpxApi/updateGpx',
+  headers: { 'Content-Type': 'application/json' },
+});
+
 const gpxHotSpotRequest = axios.create({
-  baseURL: '/gpxApi/hotSpot/',
+  baseURL: '/gpxApi/hotspots/',
+  headers: { 'Content-Type': 'application/json' },
+});
+
+const smootherGpxRequest = axios.create({
+  baseURL: '/gpxApi/smootherGpx/',
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -30,14 +40,16 @@ export const getGpxListAPI = () => gpxsRequest.get();
 export const getGpxAPI = (id) => gpxMapRequest.get(id);
 export const getGpxInfoAPI = (id) => gpxMapRequest.get(id + '/gpxInfo');
 export const getGpxTrackPointsAPI = (id) => gpxMapRequest.get(id + '/trackPoints');
-export const getGpxTrackPointsSpeedColorAPI = (id) => gpxMapRequest.get(id + '/trackPoints/speedColorInfo');
+export const getGpxTrackPointsSpeedColorAPI = (id) => gpxMapRequest.get(id + '/trackPoint/speedColorInfo');
 export const getGpxWayPointsAPI = (id) => gpxMapRequest.get(id + '/wayPoints');
 
 export const postGpxFilePathAPI = (filepaths) => gpxUploadMapRequest.post('', filepaths);
-export const putGpxAPI = (gpx) => gpxUploadMapRequest.put('', gpx);
-export const putGpxAPIForId = (id, gpx) => gpxUploadMapRequest.put(id, gpx);
+export const putGpxAPI = (gpx) => gpxUpdateMapRequest.put('', gpx);
+export const putGpxAPIForId = (id, gpx) => gpxUpdateMapRequest.put(id, gpx);
 
 export const getGpxHotSpotAPI = () => gpxHotSpotRequest.get();
+
+export const smootherGpxRequestAPI = () => smootherGpxRequest.put();
 
 // MOCK DATA
 

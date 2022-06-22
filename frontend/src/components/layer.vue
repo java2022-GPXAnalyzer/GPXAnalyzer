@@ -172,8 +172,13 @@ let mapLength = 0;
 watch(
   () => emi.state.gpxLength,
   (val) => {
-    if (val === 0) return;
-    if (mapLength < val) {
+    console.log(val);
+    if (val === 0) {
+      state.gpxMaps = [];
+      state.showLayer = [];
+      state.showMap = [];
+      mapLength = 0;
+    } else if (mapLength < val) {
       let data = emi.gpxMaps;
       state.gpxMaps.push(data[val - 1]);
       state.showLayer.push(true);

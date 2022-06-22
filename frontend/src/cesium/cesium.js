@@ -3,18 +3,18 @@ import {
   getGpxInfoAPI,
   getGpxTrackPointsAPI,
   getGpxWayPointsAPI,
-  getGpxTrackPointsSpeedColorAPI
+  getGpxTrackPointsSpeedColorAPI,
 } from '@/api/index';
 
 export class CesiumUtility {
   static convertToWGS(position) {
     var wgs84 = Cesium.Cartographic.fromCartesian(position);
     var lat = Cesium.Math.toDegrees(wgs84.latitude);
-    var lng = Cesium.Math.toDegrees(wgs84.longitude);
+    var lon = Cesium.Math.toDegrees(wgs84.longitude);
     var ele = wgs84.height;
     return {
       lat: lat,
-      lng: lng,
+      lon: lon,
       ele: ele,
     };
   }
@@ -41,9 +41,10 @@ export class CesiumUtility {
     var ctx = ramp.getContext('2d');
     var grd = ctx.createLinearGradient(0, 0, 10, 1);
     for (let i = 0; i < speed.length; i++) {
+      console.log(distance[i], speed[i] * 20 * 255);
       grd.addColorStop(
-        distance[i],
-        `rgb(255, ${speed[i] * 255}, ${speed[i] * 255})`
+        distance[i] > 1.0 ? 1.0 : distance[i],
+        `rgb(255, ${speed[i] * 20 * 255}, ${speed[i] * 20 * 255})`
       );
     }
     ctx.fillStyle = grd;
@@ -51,15 +52,15 @@ export class CesiumUtility {
     return ramp;
   }
 
-  static getGeoHeight(viewer, lng, lat) {
-    var cartographic = Cesium.Cartographic.fromDegrees(lng, lat);
+  static getGeoHeight(viewer, lon, lat) {
+    var cartographic = Cesium.Cartographic.fromDegrees(lon, lat);
     return viewer.scene.globe.getHeight(cartographic);
-    // return Cesium.Cartographic.fromDegrees(lng, lat).height;
+    // return Cesium.Cartographic.fromDegrees(lon, lat).height;
   }
 
   static convertPositionFromWGS(position) {
     return Cesium.Cartesian3.fromDegrees(
-      position.lng,
+      position.lon,
       position.lat,
       position.ele
     );
@@ -87,23 +88,27 @@ export class CesiumUtility {
 export class WayPoint {
   viewer;
 
-  constructor(viewer, point) {
+  constructor(viewer, point, color = 1) {
     this.viewer = viewer;
-    this.lng = parseFloat(point.lng || point.lon);
+    this.lon = parseFloat(point.lon);
     this.lat = parseFloat(point.lat);
     // TODO ele
     this.ele = parseFloat(point.ele);
-    this.time = Cesium.JulianDate.fromIso8601(point.time);
+    try {
+      this.time = Cesium.JulianDate.fromIso8601(point.time);
+    } catch (e) {
+      this.time = Cesium.JulianDate.fromDate(new Date());
+    }
     this.uuid = point.uuid;
     this.name = point.name || '';
-    this.position = Cesium.Cartesian3.fromDegrees(this.lng, this.lat, this.ele);
+    this.position = Cesium.Cartesian3.fromDegrees(this.lon, this.lat, this.ele);
     this.entityInfo = {
       name: this.name,
       id: this.uuid,
       position: this.position,
       point: {
-        pixelSize: 8,
-        color: Cesium.Color.RED,
+        pixelSize: color ? 8 : 20,
+        color: color ? Cesium.Color.RED : Cesium.Color.YELLOW,
         outlineColor: Cesium.Color.WHITE,
         outlineWidth: 1,
       },
@@ -147,14 +152,18 @@ export class WayPoint {
 
   _updatePosition(position) {
     this.lat = position.lat;
-    this.lng = position.lng || position.lon;
+    this.lon = position.lon || position.lon;
     this.ele = position.ele;
-    this.position = Cesium.Cartesian3.fromDegrees(this.lng, this.lat, this.ele);
+    this.position = Cesium.Cartesian3.fromDegrees(this.lon, this.lat, this.ele);
     return this.position;
   }
 
   _checkSamePointData(pointData) {
-    return this.lat === pointData.lat && this.lng === pointData.lng && this.ele === pointData.ele;
+    return (
+      this.lat === pointData.lat &&
+      this.lon === pointData.lon &&
+      this.ele === pointData.ele
+    );
   }
 
   update(pointData) {
@@ -171,7 +180,7 @@ export class WayPoint {
   toJson() {
     return {
       uuid: this.uuid,
-      lng: this.lng,
+      lon: this.lon,
       lat: this.lat,
       ele: this.ele,
       time: Cesium.JulianDate.toIso8601(this.time),
@@ -181,8 +190,7 @@ export class WayPoint {
 }
 
 export class GpxMap {
-
-  constructor(viewer, id, index) {
+  constructor(viewer, id, index, filePath) {
     this.viewer = viewer;
     this.isDrawed = false;
     this.isChanged = false;
@@ -195,17 +203,23 @@ export class GpxMap {
     this.isSpeedDistribution = false;
     this.isHover = false;
     this.gradientColor = null;
+    this.filePath = filePath;
   }
 
-  async initialize() {
-    await this.loadGpxInfo();
-    await this.loadWayPoints();
-    await this.loadTrkPoints();
+  async initialize(gpxData = null) {
+    await this.loadGpxInfo(gpxData);
+    await this.loadWayPoints(gpxData);
+    await this.loadTrkPoints(gpxData);
   }
 
-  async loadGpxInfo() {
-    var info = await getGpxInfoAPI(this.uuid);
-    info = info.data;
+  async loadGpxInfo(gpxData) {
+    let info;
+    if (gpxData) {
+      info = gpxData.gpxInfo;
+    } else {
+      info = await getGpxInfoAPI(this.uuid);
+      info = info.data;
+    }
     this.startTime = Cesium.JulianDate.fromIso8601(info.startTime);
     this.endTime = Cesium.JulianDate.fromIso8601(info.endTime);
     this.creator = info.creator;
@@ -213,9 +227,15 @@ export class GpxMap {
     this.name = info.name || '';
   }
 
-  async loadTrkPoints() {
-    var trkPoints = await getGpxTrackPointsAPI(this.uuid);
-    trkPoints = trkPoints.data;
+  async loadTrkPoints(gpxData) {
+    let trkPoints;
+    if (gpxData) {
+      trkPoints = gpxData.trackPoints;
+      console.log(trkPoints);
+    } else {
+      trkPoints = await getGpxTrackPointsAPI(this.uuid);
+      trkPoints = trkPoints.data;
+    }
     if (trkPoints === null || trkPoints.length === 0) {
       return;
     }
@@ -225,9 +245,14 @@ export class GpxMap {
     this.drawLine();
   }
 
-  async loadWayPoints() {
-    var wayPoints = await getGpxWayPointsAPI(this.uuid);
-    wayPoints = wayPoints.data;
+  async loadWayPoints(gpxData) {
+    let wayPoints;
+    if (gpxData) {
+      wayPoints = gpxData.wayPoints;
+    } else {
+      wayPoints = await getGpxWayPointsAPI(this.uuid);
+      wayPoints = wayPoints.data;
+    }
     if (wayPoints === null || wayPoints.length === 0) {
       return;
     }
@@ -358,20 +383,24 @@ export class GpxMap {
   }
 
   async _drawSpeedDistribution() {
-    if(this.gradientColor === null) {
+    if (this.gradientColor === null) {
       // TODO
-      let res = await getGpxTrackPointsSpeedColorAPI();
+      let res = await getGpxTrackPointsSpeedColorAPI(this.uuid);
       res = res.data;
-      this.gradientColor = CesiumUtility.getGradientColor(
-        res.speed || [],
-        res.distance || []
-      );
+      let speed = [],
+        distance = [];
+      res.forEach((item) => {
+        speed.push(item.first);
+        distance.push(item.second);
+      });
+      console.log(speed, distance);
+      this.gradientColor = CesiumUtility.getGradientColor(speed, distance);
     }
     this.entity.path.material = this.gradientColor;
   }
 
   async toggleSpeedDistribution() {
-    if (this.isChanged){
+    if (this.isChanged) {
       return false;
     }
     if (this.isSpeedDistribution) {
@@ -409,8 +438,8 @@ export class GpxMap {
     }
   }
 
-  unhover(){
-    if(!this.isSpeedDistribution && this.isHover) {
+  unhover() {
+    if (!this.isSpeedDistribution && this.isHover) {
       this.entity.path.material = CesiumUtility.getColor(this.index);
       this.isHover = false;
     }
@@ -466,6 +495,7 @@ export class GpxMap {
         startTime: this.startTime.toString(),
         endTime: this.endTime.toString(),
       },
+      filepath: this.filePath,
       trackPoints: [
         ...this.trkPoints.map((point) => {
           return point.toJson();

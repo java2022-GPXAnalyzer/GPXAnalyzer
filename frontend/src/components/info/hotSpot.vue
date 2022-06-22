@@ -16,12 +16,12 @@
     </svg>
     HotSpot
   </div>
-  <div class="px-3 pt-3 overflow-x-hidden overflow-y-scroll" style="max-height: calc(100% - 30px);">
+  <div class="px-3 pt-3 overflow-x-hidden overflow-y-scroll" style="max-height: calc(100% - 30px);" v-if="state.show">
     <div class="relative z-0 my-2" v-for="(point, index) in state.points" :key="point.uuid">
       <input
         type="text"
         id="name_input"
-        :value="`${point.lat}, ${point.lng || point.lon}`"
+        :value="`${point.lat}, ${point.lon}`"
         class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
         placeholder=" "
       />
@@ -40,8 +40,15 @@ import { eventManager } from '@/cesium/eventManager';
 const emi = eventManager.getInstance();
 
 const state = reactive({
-  points: computed(async () => await emi.getHotSpot())
+  show: false,
+  points: null
 });
+
+emi.getHotSpot().then((res) => {
+  state.show = true;
+  state.points = res;
+  emi.addHotSpotPoints(res);
+})
 
 </script>
 <style scoped>

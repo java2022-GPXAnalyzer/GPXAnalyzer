@@ -46,6 +46,7 @@ function onFileInput(e) {
       postDataFilePath.forEach((file) => {
         emi.gpxFilenames.push(file);
       });
+      console.log(emi.gpxFilenames);
       window.$electron.ipcRenderer.send('gotoCesium');
       emi.showLoadingPercent(5, 'gpx loaded...');
       setTimeout(() => {

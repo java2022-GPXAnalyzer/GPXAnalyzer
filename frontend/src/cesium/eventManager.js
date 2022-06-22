@@ -3,8 +3,9 @@ import {
   postGpxFilePathAPI,
   putGpxAPI,
   getGpxHotSpotAPI,
+  smootherGpxRequestAPI
 } from '@/api/index';
-import { GpxMap } from '@/cesium/cesium';
+import { WayPoint, GpxMap } from '@/cesium/cesium';
 import { Handler } from '@/cesium/handler';
 import * as Cesium from 'cesium';
 import { reactive } from 'vue';
@@ -42,6 +43,7 @@ export class eventManager {
   loadingMessage = '';
   gpxFilenames = [];
   gpxMaps = [];
+  hotSpots = [];
   nowToolMode = 0;
   allMapsStartTime = null;
   allMapsEndTime = null;
@@ -108,11 +110,10 @@ export class eventManager {
   buildGpxMaps() {
     getGpxListAPI().then(async (res) => {
       this.showLoadingPercent(60, 'GPX analyzing...');
-      console.log(res);
       res = res.data;
       let mapCount = res.length;
       res.forEach(async (uuid, index) => {
-        let gpxMap = new GpxMap(this.viewer, uuid, index);
+        let gpxMap = new GpxMap(this.viewer, uuid, index, this.gpxFilenames[index]);
         await gpxMap.initialize();
         this.gpxMaps.push(gpxMap);
         this.state.gpxLength += 1;
@@ -125,6 +126,45 @@ export class eventManager {
       });
     });
     return this;
+  }
+
+  _resetAllData () {
+    this.gpxMaps = [];
+    this.state.gpxLength = 0;
+    this.state.gpxLength = 0;
+    this.state.showAlertMode = 0;
+    this.state.showLoading = false;
+    this.state.loadingPercentMax = 0;
+    this.state.nowSelectMap = -1;
+    this.state.nowSelectPoint = null;
+    this.state.nowSelectType = 0;
+    this.state.isPointChanged = false;
+    this.state.nowToolMode = 0;
+    this.state.hotSpot = false;
+    this.viewer.entities.removeAll();
+  }
+
+  smootherGpxData() {
+    this._resetAllData();
+    this.showLoadingPercent(0, 'GPX smoothing...');
+    smootherGpxRequestAPI().then(async (res) => {
+      this.showLoadingPercent(60, 'GPX analyzing...');
+      res = res.data;
+      let mapCount = res.length;
+      res.forEach(async (data, index) => {
+        console.log(data);
+        let gpxMap = new GpxMap(this.viewer, data.gpxInfo.uuid, index, this.gpxFilenames[index]);
+        await gpxMap.initialize(data);
+        this.showLoadingPercent(
+          60 + (index + 1) * (40 / mapCount),
+          'GPX loading...'
+        );
+        this.gpxMaps.push(gpxMap);
+        this.state.gpxLength += 1;
+        this._timeUpdateAllTime();
+        this.activeTime();
+      });
+    })
   }
 
   initializeHandler() {
@@ -166,6 +206,12 @@ export class eventManager {
     this.state.nowSelectPoint = uuid;
     this.state.nowSelectType = SelectType.POINT;
     this.toggleWayPointRequest();
+  }
+
+  addHotSpotPoints(pointDatas) {
+    pointDatas.forEach((pointData) => {      
+      this.hotSpots.push(new WayPoint(this.viewer, pointData, 0));
+    });
   }
 
   removePoint(mapIdx, pointId) {
@@ -273,6 +319,7 @@ export class eventManager {
       this.gpxMaps.forEach((gpxMap) => {
         postDatas.push(gpxMap.toJson());
       });
+      console.log(postDatas)
       putGpxAPI(postDatas)
         .then((e) => {
           this.showAlertMessage(1, 'GPX file saved.');
@@ -352,7 +399,7 @@ export class eventManager {
   }
 
   async getHotSpot(){
-    let res = await getHotSpotAPI();
+    let res = await getGpxHotSpotAPI();
     res = res.data;
     return res;
   }
@@ -454,7 +501,7 @@ export class eventManager {
 
     console.log(map);
 
-    // this.viewer.imageryLayers.removeAll();
+    this.viewer.imageryLayers.removeAll();
     this.viewer.imageryLayers.addImageryProvider(maps[map]);
   }
 

@@ -14,7 +14,7 @@ public class SpeedColorHandler {
     int pointGap = 1;
     // TODO: decide proper point gap
     int len = trackPoint.size();
-    pointGap = Math.max(pointGap, len * 3 / 10);
+    pointGap = Math.max(pointGap, len / 100);
 
     return generateSpeedColorList(trackPoint, pointGap);
   }
