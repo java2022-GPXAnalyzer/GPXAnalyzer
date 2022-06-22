@@ -46,6 +46,7 @@ function percentMethod() {
     gsap.to(state, { duration: 0.5, loadingPercent: percent });
     setTimeout(() => {
       state.isLoading = false;
+      emi.hideLoading();      
     }, 500);
     return;
   }
