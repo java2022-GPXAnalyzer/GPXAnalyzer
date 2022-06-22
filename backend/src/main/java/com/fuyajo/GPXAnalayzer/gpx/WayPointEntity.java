@@ -93,7 +93,7 @@ public class WayPointEntity extends AbstractEntity {
     try {
       time = getWayPoint().getTime().orElse(time);
     } catch (Exception e) {
-      LOGGER.error("getStartTime() error: " + e);
+      LOGGER.error("getTime() error: " + e);
     }
     return time;
   }

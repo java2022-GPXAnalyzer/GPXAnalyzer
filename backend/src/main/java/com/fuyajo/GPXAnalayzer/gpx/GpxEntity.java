@@ -77,7 +77,6 @@ public class GpxEntity extends AbstractEntity {
     super(uuid);
     this.filepath = filepath;
     this.gpx = gpx.toBuilder().build();
-    gpxInfo = new GpxInfo(this);
     gpx.getWayPoints().forEach(wayPoint -> {
       this.wayPoints.add(new WayPointEntity(wayPoint, this, this.wayPoints));
     });
@@ -93,6 +92,7 @@ public class GpxEntity extends AbstractEntity {
         });
       });
     });
+    gpxInfo = new GpxInfo(this);
   }
   
   public String getFilepath() {
@@ -206,7 +206,7 @@ public class GpxEntity extends AbstractEntity {
   public String getStartTime() {
     Instant time = Instant.ofEpochMilli(0);
     try {
-      time = trackPoints.get(0).getTime();
+      time = this.trackPoints.get(0).getTime();
     } catch (Exception e) {
       LOGGER.error("getStartTime() error: " + e);
     }
@@ -216,7 +216,7 @@ public class GpxEntity extends AbstractEntity {
   public String getEndTime() {
     Instant time = Instant.ofEpochMilli(0);
     try {
-      time = trackPoints.get(trackPoints.size() - 1).getTime();
+      time = this.trackPoints.get(trackPoints.size() - 1).getTime();
     } catch (Exception e) {
       LOGGER.error("getEndTime() error: " + e);
     }

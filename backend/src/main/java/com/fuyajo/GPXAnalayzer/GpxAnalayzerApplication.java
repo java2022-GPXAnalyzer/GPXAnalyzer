@@ -43,7 +43,7 @@ public class GpxAnalayzerApplication {
 		return ResponseEntity.ok("GpxAnalayzer");
 	}
 
-  @GetMapping("/gpxApi/idList/")
+  @GetMapping("/gpxApi/idList")
   public ResponseEntity<?> getIdList() {
     Gson gson = new Gson();
     List<String> idList = gpxCollector.getUuids().stream()
@@ -107,7 +107,7 @@ public class GpxAnalayzerApplication {
         gpxCollector.addByFilepath(gpxFilePath);
         uuids.add(gpxCollector.getLast().getUuid());
       }
-      return ResponseEntity.ok("OK, " + "uploaded gpx file uuids: " + gson.toJson(uuids));
+      return ResponseEntity.ok(gson.toJson(uuids));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (IOException e) {
@@ -121,7 +121,7 @@ public class GpxAnalayzerApplication {
       Gson gson = GpxGsonBuilder.getNewBuilder().create();
       GpxEntity gpxEntity = gson.fromJson(gpxJson, GpxEntity.class);
       gpxCollector.update(gpxEntity);
-      return ResponseEntity.ok("OK, updated gpx file uuid: " + gpxId);
+      return ResponseEntity.ok(gson.toJson(gpxId));
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (IOException e) {
@@ -138,7 +138,7 @@ public class GpxAnalayzerApplication {
         GpxEntity gpx = GpxEntity.fromJson(gpxJson.toString());
         gpxCollector.update(gpx);
       }
-      return ResponseEntity.ok("OK, updated gpx files");
+      return ResponseEntity.ok().build();
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     } catch (IOException e) {
