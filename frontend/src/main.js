@@ -1,10 +1,7 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import './css/index.css'
-import axios from 'axios'
-import VueAxios from 'vue-axios'
+import { createApp } from 'vue';
+import { route } from '@/router/route';
+import App from './App.vue';
+import './css/index.css';
+import 'cesium/index.css';
 
-const app = createApp(App)
-app.use(VueAxios, axios)
-
-app.mount('#app')
+createApp(App).use(route).mount('#app');
