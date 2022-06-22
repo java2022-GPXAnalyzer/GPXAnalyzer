@@ -45,8 +45,11 @@ public class SpeedColorHandler {
   private Double getSpeed(WayPointEntity wayPoint1, WayPointEntity wayPoint2,
                           Double distance) {
     Double time =
-        (double)Duration.between(wayPoint2.getTime(), wayPoint2.getTime())
+        (double)Duration.between(wayPoint1.getTime(), wayPoint2.getTime())
             .toMillis();
+    if (time == 0.0) {
+      return 0.0;
+    }
     return distance / time;
   }
 
