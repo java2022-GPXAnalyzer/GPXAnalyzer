@@ -25,7 +25,7 @@ public class HotSpotHandler {
     LOGGER.info("Executing HotSpot algorithm...");
     for(int i = 2; i <= Math.min(10, points.size() - 1); i++) {
       List<WayPointEntity> hotSpots = kmean(points, i);
-      LOGGER.debug("k: " + i + ", sc = " + curSC);
+      LOGGER.info("k: " + i + ", sc = " + curSC);
       if(bestSC < curSC) {
         bestSC = curSC;
         bestHotSpots = hotSpots;

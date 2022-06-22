@@ -16,9 +16,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
+import com.fuyajo.GPXAnalayzer.gpx.WayPointEntity;
 import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
 import com.fuyajo.GPXAnalayzer.gpx.json.SpeedColorAdapter;
 import com.fuyajo.GPXAnalayzer.gpx.speedColor.SpeedColorHandler;
+import com.fuyajo.GPXAnalayzer.gpx.trackProcess.HotSpotHandler;
+import com.fuyajo.GPXAnalayzer.gpx.trackProcess.TrackSmoother;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -125,6 +128,36 @@ public class GpxAnalayzerApplication {
       return ResponseEntity.ok(gson.toJson(speedColorList));
     } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping("/gpxApi/hotspots/")
+  public ResponseEntity<?> getHotSpots() {
+    try{
+      LOGGER.info("getHotSpots() start");
+      List<GpxEntity> gpxEntities = gpxCollector.getGpxEntities();
+      List<WayPointEntity> points = new ArrayList<WayPointEntity>();
+
+      LOGGER.info("Start smooth gpx tracks");
+      TrackSmoother trackSmoother = new TrackSmoother();
+      for(GpxEntity gpxEntity : gpxEntities) {
+        List<WayPointEntity> trackPoints = gpxEntity.getTrackPoints();
+        trackPoints = trackSmoother.smoothTrack(trackPoints);
+        trackPoints = trackSmoother.generateIsometricTrack(trackPoints, 50);
+        trackPoints.forEach(
+          trackPoint -> points.add(trackPoint)
+        );
+      }
+
+      LOGGER.info("Start generate hot spots");
+      HotSpotHandler hotSpotHandler = new HotSpotHandler();
+      List<WayPointEntity> hotSpots = hotSpotHandler.generateHotSpot(points);
+
+      Gson gpxGson = GpxGsonBuilder.getNewBuilder().create();
+      LOGGER.info("getHotSpots() end");
+      return ResponseEntity.ok(gpxGson.toJson(hotSpots));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 

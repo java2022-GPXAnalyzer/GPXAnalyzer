@@ -57,4 +57,10 @@ public class GpxCollector {
   public GpxEntity getLast() {
     return new GpxEntity(gpxEntities.get(gpxEntities.size() - 1));
   }
+
+  public List<GpxEntity> getGpxEntities() {
+    List<GpxEntity> newGpxEntities = new ArrayList<>();
+    this.gpxEntities.forEach(gpxEntity -> newGpxEntities.add(new GpxEntity(gpxEntity)));
+    return newGpxEntities;
+  }
 }
