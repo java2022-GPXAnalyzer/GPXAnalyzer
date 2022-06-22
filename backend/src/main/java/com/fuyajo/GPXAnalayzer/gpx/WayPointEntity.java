@@ -1,6 +1,7 @@
 package com.fuyajo.GPXAnalayzer.gpx;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -13,9 +14,17 @@ public class WayPointEntity extends AbstractEntity {
   private static final Logger LOGGER = LoggerFactory.getLogger(WayPointEntity.class);
 
   private WayPoint wayPoint;
+  private GpxEntity srcGpxEntity = null;
+  private List<WayPointEntity> srcList = null;
 
   public WayPointEntity(WayPoint wayPoint) {
+    this(wayPoint, (GpxEntity)null, (List<WayPointEntity>)null);
+  }
+
+  public WayPointEntity(WayPoint wayPoint, GpxEntity srcGpxEntity, List<WayPointEntity> srcList) {
     this.wayPoint = wayPoint.toBuilder().build();
+    this.srcGpxEntity = srcGpxEntity;
+    this.srcList = srcList;
   }
 
   public WayPointEntity(WayPoint wayPoint, UUID uuid) {
@@ -31,8 +40,14 @@ public class WayPointEntity extends AbstractEntity {
   }
 
   public WayPointEntity(WayPointEntity wayPointEntity) {
+    this(wayPointEntity, wayPointEntity.srcGpxEntity, wayPointEntity.srcList);
+  }
+
+  public WayPointEntity(WayPointEntity wayPointEntity, GpxEntity srcGpxEntity, List<WayPointEntity> srcList) {
     super(wayPointEntity.getUuid());
     this.wayPoint = wayPointEntity.getWayPoint();
+    this.srcGpxEntity = srcGpxEntity;
+    this.srcList = srcList;
   }
 
   public static Double getDistanceWithMeter(WayPointEntity wayPointEntity1, WayPointEntity wayPointEntity2) {
