@@ -27,6 +27,15 @@ public class GpxInfo {
     this.name = gpxEntity.getName();
   } 
 
+  public GpxInfo(GpxInfo gpxInfo) {
+    this.uuid = gpxInfo.getUuid();
+    this.startTime = gpxInfo.getStartTime();
+    this.endTime = gpxInfo.getEndTime();
+    this.creator = gpxInfo.getCreator();
+    this.version = gpxInfo.getVersion();
+    this.name = gpxInfo.getName();
+  }
+
   public String getUuid() {
     return uuid;
   }
