@@ -10,13 +10,17 @@ import java.util.stream.Collectors;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.fuyajo.GPXAnalayzer.gpx.GpxEntity;
 import com.fuyajo.GPXAnalayzer.gpx.json.GpxGsonBuilder;
+import com.fuyajo.GPXAnalayzer.gpx.json.SpeedColorAdapter;
+import com.fuyajo.GPXAnalayzer.gpx.speedColor.SpeedColorHandler;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -91,6 +95,34 @@ public class GpxAnalayzerApplication {
       return ResponseEntity.ok(
         GpxGsonBuilder.getNewBuilder().create().toJson(gpx.getWayPoints())
       );
+    } catch (NoSuchElementException e) {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @GetMapping("/gpxApi/gpx/{gpxId}/trackPoint/speedColorInfo")
+  public ResponseEntity<?> getTrackSpeedColorInfo(
+      @PathVariable("gpxId") String gpxId,
+      @RequestParam(required = false) Integer pointGap)
+  {
+    try {
+      GpxEntity gpx = gpxCollector.getGpxEntity(gpxId);
+      SpeedColorHandler speedColorHandler = new SpeedColorHandler();
+      List<Pair<Double, Double> > speedColorList;
+      if(pointGap == null) {
+        speedColorList = speedColorHandler.generateSpeedColorList(gpx.getTrackPoints());
+      } else {
+        speedColorList = speedColorHandler.generateSpeedColorList(gpx.getTrackPoints(), pointGap);
+      }
+
+      LOGGER.info(speedColorList.toString());
+      Type speedColorType = TypeToken.getParameterized(Pair.class, Double.class, Double.class).getType();
+      Type speedColorListType = TypeToken.getParameterized(List.class, speedColorType).getType();
+      LOGGER.info(speedColorListType.toString());
+      Gson gson = (new GsonBuilder())
+        .registerTypeAdapter(speedColorListType, new SpeedColorAdapter())
+        .create();
+      return ResponseEntity.ok(gson.toJson(speedColorList));
     } catch (NoSuchElementException e) {
       return ResponseEntity.notFound().build();
     }
