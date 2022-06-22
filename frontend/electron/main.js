@@ -12,7 +12,8 @@ function createWindow() {
     show: false,
     autoHideMenuBar: false,
     webPreferences: {
-      devTools: process.env.NODE_ENV === 'development',
+      devTools: true,
+      // devTools: process.env.NODE_ENV === 'development',
       preload: path.join(__dirname, 'preload.js'),
       webSecurity: false
     }
@@ -35,6 +36,7 @@ function createWindow() {
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
   }
+  mainWindow.webContents.openDevTools();
 
   ipcMain.on('gotoCesium', () => {
     mainWindow.maximize();

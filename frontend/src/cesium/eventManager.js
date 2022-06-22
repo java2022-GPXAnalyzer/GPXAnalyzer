@@ -131,7 +131,6 @@ export class eventManager {
   _resetAllData () {
     this.gpxMaps = [];
     this.state.gpxLength = 0;
-    this.state.gpxLength = 0;
     this.state.showAlertMode = 0;
     this.state.showLoading = false;
     this.state.loadingPercentMax = 0;
@@ -152,7 +151,6 @@ export class eventManager {
       res = res.data;
       let mapCount = res.length;
       res.forEach(async (data, index) => {
-        console.log(data);
         let gpxMap = new GpxMap(this.viewer, data.gpxInfo.uuid, index, this.gpxFilenames[index]);
         await gpxMap.initialize(data);
         this.showLoadingPercent(
@@ -527,7 +525,7 @@ export class eventManager {
   }
 
   showLoadingPercent(percent, message) {
-    console.log(percent, message);
+    // console.log(percent, message);
     this.state.showLoading = true;
     this.state.loadingPercentMax = percent;
     this.loadingMessage = message;

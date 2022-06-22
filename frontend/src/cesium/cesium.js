@@ -231,7 +231,6 @@ export class GpxMap {
     let trkPoints;
     if (gpxData) {
       trkPoints = gpxData.trackPoints;
-      console.log(trkPoints);
     } else {
       trkPoints = await getGpxTrackPointsAPI(this.uuid);
       trkPoints = trkPoints.data;

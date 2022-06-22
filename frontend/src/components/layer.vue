@@ -2,6 +2,7 @@
   <div class="round-none border-2 border-black w-64 m-1 p-1">
     <p class="title">Map</p>
     <div
+      :key="mapLength"
       class="m-auto justify-center flex-wrap flex overflow-y-scroll overflow-x-hidden"
       style="max-height: calc(100% - 33px)"
     >
@@ -172,15 +173,20 @@ let mapLength = 0;
 watch(
   () => emi.state.gpxLength,
   (val) => {
-    console.log(val);
     if (val === 0) {
       state.gpxMaps = [];
       state.showLayer = [];
       state.showMap = [];
       mapLength = 0;
-    } else if (mapLength < val) {
+    } else {
       let data = emi.gpxMaps;
-      state.gpxMaps.push(data[val - 1]);
+      if(val > mapLength) {
+        for(let i = mapLength; i < val; i++) {
+          state.gpxMaps.push(data[i]);
+          state.showLayer.push(false);
+          state.showMap.push(false);
+        }
+      }
       state.showLayer.push(true);
       state.showMap.push(true);
       mapLength = val;
