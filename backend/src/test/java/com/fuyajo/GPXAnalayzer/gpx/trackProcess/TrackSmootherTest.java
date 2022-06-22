@@ -43,7 +43,7 @@ public class TrackSmootherTest {
 
       TrackSmoother trackSmoother = new TrackSmoother();
       trackPoints = trackSmoother.smoothTrack(trackPoints);
-      trackPoints = trackSmoother.generateIsometricTrack(trackPoints, 5);
+      trackPoints = trackSmoother.generateIsometricTrack(trackPoints, 50);
 
       GpxEntity oriGpxEntity = new GpxEntity(gpxEntity);
       gpxEntity.setTrackPoints(trackPoints);

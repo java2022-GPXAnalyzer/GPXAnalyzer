@@ -163,7 +163,7 @@ public class GpxEntity extends AbstractEntity {
   }
 
   public void setGpxInfo(GpxInfo gpxInfo) {
-    this.gpxInfo = gpxInfo;
+    this.gpxInfo = new GpxInfo(gpxInfo);
     this.syncGpxWithData();
   }
 
@@ -174,7 +174,8 @@ public class GpxEntity extends AbstractEntity {
   }
 
   public void setWayPoints(List<WayPointEntity> wayPoints) {
-    this.wayPoints = new ArrayList<>(wayPoints);
+    this.wayPoints = new ArrayList<>();
+    wayPoints.forEach(wayPoint -> this.wayPoints.add(new WayPointEntity(wayPoint)));
     this.syncGpxWithData();
   }
 
@@ -185,7 +186,8 @@ public class GpxEntity extends AbstractEntity {
   }
 
   public void setRoutePoints(List<WayPointEntity> routePoints) {
-    this.routePoints = new ArrayList<>(routePoints);
+    this.routePoints = new ArrayList<>();
+    routePoints.forEach(routePoint -> this.routePoints.add(new WayPointEntity(routePoint)));
     this.syncGpxWithData();
   }
 
@@ -196,7 +198,8 @@ public class GpxEntity extends AbstractEntity {
   }
 
   public void setTrackPoints(List<WayPointEntity> trackPoints) {
-    this.trackPoints = new ArrayList<>(trackPoints);
+    this.trackPoints = new ArrayList<>();
+    trackPoints.forEach(trackPoint -> this.trackPoints.add(new WayPointEntity(trackPoint)));
     this.syncGpxWithData();
   }
 

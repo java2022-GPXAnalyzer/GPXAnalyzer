@@ -23,6 +23,13 @@ public class WayPointEntity extends AbstractEntity {
     this.wayPoint = wayPoint.toBuilder().build();
   }
 
+  public WayPointEntity(double lat, double lon) {
+    this.wayPoint = WayPoint.builder()
+      .lat(lat)
+      .lon(lon)
+      .build();
+  }
+
   public WayPointEntity(WayPointEntity wayPointEntity) {
     super(wayPointEntity.getUuid());
     this.wayPoint = wayPointEntity.getWayPoint();
@@ -54,8 +61,16 @@ public class WayPointEntity extends AbstractEntity {
     return wayPoint.getLatitude().doubleValue();
   }
 
+  public void setLatitude(Double lat) {
+    this.wayPoint = this.wayPoint.toBuilder().lat(lat).build();
+  }
+
   public Double getLongitude() {
     return wayPoint.getLongitude().doubleValue();
+  }
+
+  public void setLongitude(Double lon) {
+    this.wayPoint = this.wayPoint.toBuilder().lon(lon).build();
   }
 
   public Instant getTime() {
