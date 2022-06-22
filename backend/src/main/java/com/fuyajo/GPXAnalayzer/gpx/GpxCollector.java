@@ -46,6 +46,11 @@ public class GpxCollector {
     throw new NoSuchElementException("Gpx Entity Not Found");
   }
 
+  public void setGpxEntities(List<GpxEntity> gpxEntities) {
+    this.gpxEntities = new ArrayList<>();
+    gpxEntities.forEach(gpxEntity -> this.gpxEntities.add(new GpxEntity(gpxEntity)));
+  }
+
   public List<UUID> getUuids() {
     List<UUID> uuids = new ArrayList<>();
     for (GpxEntity gpx : gpxEntities) {

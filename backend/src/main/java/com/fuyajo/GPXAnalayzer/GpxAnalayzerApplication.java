@@ -210,4 +210,31 @@ public class GpxAnalayzerApplication {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
+  @PutMapping("/gpxApi/smootherGpx/")
+  public ResponseEntity<?> smootherAllGpx() {
+    try{
+      LOGGER.info("getHotSpots() start");
+      List<GpxEntity> gpxEntities = gpxCollector.getGpxEntities();
+
+      LOGGER.info("Start smooth gpx tracks");
+      TrackSmoother trackSmoother = new TrackSmoother();
+      for(int i = 0; i < gpxEntities.size(); i++){
+        List<WayPointEntity> trackPoints = gpxEntities.get(i).getTrackPoints();
+        trackPoints = trackSmoother.smoothTrack(trackPoints);
+        // trackPoints = trackSmoother.generateIsometricTrack(trackPoints, 50);
+        GpxEntity gpxEntity = gpxEntities.get(i);
+        gpxEntity.setTrackPoints(trackPoints);
+        LOGGER.info("len: " + gpxEntity.getTrackPoints().size());
+        gpxEntities.set(i, gpxEntity);
+      }
+      LOGGER.info("len: " + gpxEntities.get(0).getTrackPoints().size());
+      gpxCollector.setGpxEntities(gpxEntities);
+
+      Gson gpxGson = GpxGsonBuilder.getNewBuilder().create();
+      return ResponseEntity.ok(gpxGson.toJson(gpxCollector.getGpxEntities()));
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
+  }
 }
