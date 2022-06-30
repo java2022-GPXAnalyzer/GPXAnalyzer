@@ -24,7 +24,6 @@
 </template>
 <script setup>
 import { ref } from 'vue';
-import { postGpxFilePathAPI } from '@/api/index';
 
 import { eventManager } from '@/cesium/eventManager';
 const emi = eventManager.getInstance();
@@ -33,6 +32,8 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const file = ref('file');
+
+window.backendAPI.startServerForSpawn();
 
 function onFileInput(e) {
   const files = e.target.files;
@@ -46,7 +47,6 @@ function onFileInput(e) {
       postDataFilePath.forEach((file) => {
         emi.gpxFilenames.push(file);
       });
-      console.log(emi.gpxFilenames);
       window.$electron.ipcRenderer.send('gotoCesium');
       emi.showLoadingPercent(5, 'gpx loaded...');
       setTimeout(() => {

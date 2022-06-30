@@ -37,6 +37,10 @@
     "appId": "com.fuyajo.gpx-analyzer",
     "productName": "GPX Analyzer",
     "copyright": "Copyright © 2022 Fuyajo",
+    "extraResources": [
+      "./backendApp/**",
+      "./jre/**"
+    ],
     "mac": {
       "category": "public.app-category.utilities"
     },

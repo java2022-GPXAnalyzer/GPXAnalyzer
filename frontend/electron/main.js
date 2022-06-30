@@ -12,8 +12,8 @@ function createWindow() {
     show: false,
     autoHideMenuBar: false,
     webPreferences: {
-      devTools: true,
-      // devTools: process.env.NODE_ENV === 'development',
+      // devTools: true,
+      devTools: process.env.NODE_ENV === 'development',
       preload: path.join(__dirname, 'preload.js'),
       webSecurity: false
     }
@@ -36,6 +36,7 @@ function createWindow() {
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
   }
+  // mainWindow.webContents.openDevTools();
 
   ipcMain.on('gotoCesium', () => {
     mainWindow.maximize();
@@ -51,6 +52,5 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', function () {
-  shell.openPath(path.resolve() + '\\stop.bat');
   if (process.platform !== 'darwin') app.quit();
 });
