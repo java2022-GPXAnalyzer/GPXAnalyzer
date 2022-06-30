@@ -183,12 +183,10 @@ watch(
       if(val > mapLength) {
         for(let i = mapLength; i < val; i++) {
           state.gpxMaps.push(data[i]);
-          state.showLayer.push(false);
-          state.showMap.push(false);
+          state.showLayer.push(true);
+          state.showMap.push(true);
         }
       }
-      state.showLayer.push(true);
-      state.showMap.push(true);
       mapLength = val;
     }
   }

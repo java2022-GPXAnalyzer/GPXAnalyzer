@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -36,7 +36,6 @@ function createWindow() {
   if (process.env.NODE_ENV === 'development') {
     mainWindow.webContents.openDevTools();
   }
-  mainWindow.webContents.openDevTools();
 
   ipcMain.on('gotoCesium', () => {
     mainWindow.maximize();
@@ -52,5 +51,6 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', function () {
+  shell.openPath(path.resolve() + '\\stop.bat');
   if (process.platform !== 'darwin') app.quit();
 });

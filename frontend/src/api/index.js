@@ -5,32 +5,32 @@ import MockAdapter from 'axios-mock-adapter';
 // var mock = new MockAdapter(axios, { delayResponse: 100 });
 
 const gpxsRequest = axios.create({
-  baseURL: '/gpxApi/idList/',
+  baseURL: 'http://localhost:8081/gpxApi/idList/',
   headers: { 'Content-Type': 'application/json' },
 });
 
 const gpxMapRequest = axios.create({
-  baseURL: '/gpxApi/gpx/',
+  baseURL: 'http://localhost:8081/gpxApi/gpx/',
   headers: { 'Content-Type': 'application/json' },
 });
 
 const gpxUploadMapRequest = axios.create({
-  baseURL: '/gpxApi/uploadGpx',
+  baseURL: 'http://localhost:8081/gpxApi/uploadGpx',
   headers: { 'Content-Type': 'application/json' },
 });
 
 const gpxUpdateMapRequest = axios.create({
-  baseURL: '/gpxApi/updateGpx',
+  baseURL: 'http://localhost:8081/gpxApi/updateGpx',
   headers: { 'Content-Type': 'application/json' },
 });
 
 const gpxHotSpotRequest = axios.create({
-  baseURL: '/gpxApi/hotspots/',
+  baseURL: 'http://localhost:8081/gpxApi/hotspots/',
   headers: { 'Content-Type': 'application/json' },
 });
 
 const smootherGpxRequest = axios.create({
-  baseURL: '/gpxApi/smootherGpx/',
+  baseURL: 'http://localhost:8081/gpxApi/smootherGpx/',
   headers: { 'Content-Type': 'application/json' },
 });
 
