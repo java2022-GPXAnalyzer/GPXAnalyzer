@@ -34,7 +34,7 @@
 
 ### Frontend
 
-Version: Windows, node.js >= v16.15.0, npm >= v8.5.5 (LTS version) \\
+Version: Windows, node.js >= v16.15.0, npm >= v8.5.5 (LTS version)
 ```bash
 git clone https://github.com/java2022-GPXAnalyzer/GPXAnalyzer.git
 cd frontend
@@ -44,7 +44,7 @@ yarn electron:serve
 
 ### Backend
 
-Version: Windows, Java SE 17 \\
+Version: Windows, Java SE 17
 ```bash
 git clone https://github.com/java2022-GPXAnalyzer/GPXAnalyzer.git
 cd backend
