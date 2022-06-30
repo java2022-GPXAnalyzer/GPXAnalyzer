@@ -10,7 +10,7 @@
 
 [jteng2127](https://github.com/jteng2127)
 
-[Rager][https://github.com/Rager0321]
+[Rager](https://github.com/Rager0321)
 
 ## Install
 
