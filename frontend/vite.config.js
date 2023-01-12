@@ -13,7 +13,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 3100,
     proxy: {
       '^/gpxApi/.*': {
         target: 'http://localhost:8081/',

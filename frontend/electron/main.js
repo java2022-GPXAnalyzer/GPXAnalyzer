@@ -22,7 +22,7 @@ function createWindow() {
   // mainWindow.loadFile('dist/index.html');
   mainWindow.loadURL(
     process.env.NODE_ENV === 'development'
-      ? 'http://127.0.0.1:3000/'
+      ? 'http://127.0.0.1:3100/'
       : `file://${path.join(__dirname, '../dist/index.html')}`
   );
 

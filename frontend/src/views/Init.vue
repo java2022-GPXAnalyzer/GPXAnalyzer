@@ -26,7 +26,15 @@
 import { ref } from 'vue';
 
 import { eventManager } from '@/cesium/eventManager';
+import * as emi23  from '@/eventManager/index';
 const emi = eventManager.getInstance();
+
+const emi2 = emi23.eventManager.getInstance();
+
+console.log(emi2)
+
+console.log(emi2.test.test());
+
 
 import { useRouter } from 'vue-router';
 const router = useRouter();

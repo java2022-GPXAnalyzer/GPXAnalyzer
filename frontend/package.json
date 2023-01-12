@@ -6,7 +6,7 @@
     "build": "vite build",
     "dev": "vite",
     "cesium-fix": "node ./cesium-fix.js",
-    "electron": "wait-on tcp:3000 && SET NODE_ENV=development&& electron .",
+    "electron": "wait-on tcp:3100 && SET NODE_ENV=development&& electron .",
     "electron:build": "vite build && electron-builder",
     "electron:serve": "concurrently -k \"yarn dev\" \"yarn electron\"",
     "preview": "vite preview"
